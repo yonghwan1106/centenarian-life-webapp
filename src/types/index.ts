@@ -14,6 +14,9 @@ export interface HealthData {
   blood_pressure_diastolic?: number
   weight?: number
   height?: number
+  steps?: number
+  sleep_hours?: number
+  mood_rating?: number
   recorded_at: string
   created_at: string
 }
