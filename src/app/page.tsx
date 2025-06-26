@@ -51,10 +51,10 @@ export default function HomePage() {
                 <h3 className="font-semibold mb-2">AI 추천</h3>
                 <p className="text-sm opacity-80">개인화된 건강 조언을 받아보세요</p>
               </Link>
-              <div className="bg-white/10 p-4 rounded-lg opacity-50">
-                <h3 className="font-semibold mb-2">커뮤니티 (곧 출시)</h3>
+              <Link href="/community" className="bg-white/10 p-4 rounded-lg hover:bg-white/20 transition-colors">
+                <h3 className="font-semibold mb-2">커뮤니티</h3>
                 <p className="text-sm opacity-80">다른 사용자들과 소통하세요</p>
-              </div>
+              </Link>
             </div>
           </div>
         </div>
