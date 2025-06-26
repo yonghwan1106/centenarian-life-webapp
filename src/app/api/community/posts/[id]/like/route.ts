@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     // Authorization 헤더에서 토큰 가져오기
@@ -20,7 +20,7 @@ export async function POST(
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
-    const { id } = params
+    const { id } = await params
 
     const { liked, error } = await database.toggleLike(id, user.id)
 
