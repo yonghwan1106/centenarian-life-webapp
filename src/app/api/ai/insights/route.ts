@@ -42,9 +42,16 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // AI 인사이트 생성
-    const insight = await generateHealthInsight(latestHealthData)
+    // AI 인사이트 생성 (타임아웃 추가)
+    console.log('Generating AI insight...')
+    const insight = await Promise.race([
+      generateHealthInsight(latestHealthData),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('AI request timeout')), 25000) // 25초 타임아웃
+      )
+    ]) as string
 
+    console.log('AI insight generated successfully')
     return NextResponse.json({ 
       insight,
       healthData: latestHealthData,
@@ -53,9 +60,14 @@ export async function POST(request: NextRequest) {
 
   } catch (error) {
     console.error('Error generating AI insight:', error)
+    
+    // 타임아웃 또는 API 에러 시 기본 응답
+    const fallbackInsight = '건강 관리에 신경써주셔서 감사합니다! 꾸준히 기록해주세요! 💪'
+    
     return NextResponse.json({ 
-      insight: '죄송합니다. 잠시 후 다시 시도해주세요.',
-      error: 'Internal server error' 
-    }, { status: 500 })
+      insight: fallbackInsight,
+      error: 'AI 분석 중 오류가 발생했지만 기본 조언을 제공합니다.',
+      fallback: true
+    })
   }
 }

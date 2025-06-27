@@ -37,8 +37,14 @@ export async function POST(request: NextRequest) {
       })
     }
 
-    // AI 추천 생성 (프로필이 없어도 건강 데이터로 추천 생성)
-    const recommendations = await generateHealthRecommendations(healthData, userProfile)
+    // AI 추천 생성 (타임아웃 추가)
+    console.log('Generating AI recommendations...')
+    const recommendations = await Promise.race([
+      generateHealthRecommendations(healthData, userProfile),
+      new Promise((_, reject) => 
+        setTimeout(() => reject(new Error('Recommendations timeout')), 20000) // 20초 타임아웃
+      )
+    ]) as any[]
 
     // 추천을 데이터베이스에 저장
     const savedRecommendations = []

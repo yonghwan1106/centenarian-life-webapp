@@ -45,39 +45,26 @@ export async function generateHealthRecommendations(
     }
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-3.5-turbo", // 더 빠른 모델 사용
       messages: [
         {
           role: "system",
-          content: `당신은 한국의 웰니스 전문가입니다. 사용자의 건강 데이터를 분석하고 개인화된 건강 추천을 제공해주세요. 
+          content: `건강 추천을 JSON 배열로 제공하세요:
+          [{"title":"제목","description":"설명","category":"exercise|nutrition|sleep|mental_health","priority":"low|medium|high","confidence":0.8}]
           
-          응답은 반드시 JSON 배열 형식으로 다음 구조를 정확히 따라주세요:
-          [
-            {
-              "title": "추천 제목 (한국어, 20자 이내)",
-              "description": "상세 설명 (한국어, 100자 이내, 구체적이고 실행 가능한 조언)",
-              "category": "exercise|nutrition|sleep|mental_health",
-              "priority": "low|medium|high",
-              "confidence": 0.7
-            }
-          ]
-          
-          주의사항:
-          - 의학적 진단이나 치료는 절대 제공하지 마세요
-          - 일반적이고 안전한 건강 조언만 제공하세요
-          - 3-4개의 추천을 제공하세요
-          - JSON 형식을 정확히 지켜주세요`
+          - 2-3개 추천만
+          - 안전한 일반 조언만
+          - 의학적 진단 금지`
         },
         {
           role: "user",
-          content: `건강 데이터: ${JSON.stringify(healthData?.slice(0, 5) || [])}
-          사용자 프로필: ${JSON.stringify(userProfile || {})}
+          content: `데이터: ${JSON.stringify(healthData?.slice(0, 3) || [])}
           
-          이 정보를 바탕으로 3-4개의 개인화된 건강 추천을 JSON 배열로 제공해주세요.`
+          JSON 배열로 2-3개 건강 추천해주세요.`
         }
       ],
-      temperature: 0.7,
-      max_tokens: 1500,
+      temperature: 0.5,
+      max_tokens: 800, // 토큰 수 줄임
     })
 
     const content = completion.choices[0]?.message?.content
@@ -108,29 +95,23 @@ export async function generateHealthInsight(
     }
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4",
+      model: "gpt-3.5-turbo", // 더 빠른 모델 사용
       messages: [
         {
           role: "system",
-          content: `당신은 친근하고 전문적인 한국의 AI 건강 도우미입니다. 
-          사용자의 건강 데이터를 분석하고 격려와 함께 간단한 인사이트를 제공해주세요.
+          content: `당신은 친근한 한국 AI 건강 도우미입니다. 간단하고 격려적인 인사이트를 제공하세요.
           
-          응답 조건:
-          - 50-80자 이내로 간결하게
-          - 친근하고 격려적인 톤
-          - 구체적인 수치나 개선점 언급
-          - 이모지 1-2개 포함
-          - 의학적 진단은 절대 하지 마세요`
+          조건: 30-50자, 친근한 톤, 이모지 1개, 의학적 진단 금지`
         },
         {
           role: "user",
-          content: `최근 건강 데이터: ${JSON.stringify(healthData)}
+          content: `건강 데이터: 심박수=${healthData.heart_rate}, 체중=${healthData.weight}, 수면=${healthData.sleep_hours}시간, 걸음수=${healthData.steps}
           
-          이 데이터를 바탕으로 친근하고 격려적인 건강 인사이트를 제공해주세요.`
+          간단한 격려 메시지를 주세요.`
         }
       ],
-      temperature: 0.8,
-      max_tokens: 150,
+      temperature: 0.7,
+      max_tokens: 100, // 토큰 수 줄임
     })
 
     const insight = completion.choices[0]?.message?.content
