@@ -1,7 +1,7 @@
 'use client'
 
 import { useAuth } from '@/components/AuthProvider'
-import LoginForm from '@/components/LoginForm'
+import LandingPage from '@/components/LandingPage'
 import HealthDashboard from '@/components/HealthDashboard'
 import { PageLayout } from '@/components/AppNavigation'
 import Link from 'next/link'
@@ -18,7 +18,7 @@ export default function HomePage() {
   }
 
   if (!user) {
-    return <LoginForm />
+    return <LandingPage />
   }
 
   return (
