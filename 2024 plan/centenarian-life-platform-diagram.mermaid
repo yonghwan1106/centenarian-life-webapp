@@ -1,0 +1,24 @@
+graph TB
+    A[사용자] --> B[데이터 수집]
+    B --> |웨어러블 기기| C[24/7 생체 데이터]
+    B --> |앱 내 설문| D[주기적 설문 데이터]
+    C --> E[AI 분석 엔진]
+    D --> E
+    E --> F[개인 웰니스 프로필]
+    E --> G[맞춤형 계획 생성기]
+    G --> H[개인화된 건강 목표]
+    G --> I[구체적 액션 플랜]
+    E --> J[실시간 관리 시스템]
+    J --> K[24시간 활동 모니터링]
+    J --> L[AI 실시간 피드백]
+    M[전문가 네트워크] --> N[화상 상담 서비스]
+    O[사용자 커뮤니티] --> P[정보 공유 및 소통]
+    E --> Q[정기 성과 분석]
+    Q --> R[월간 종합 건강 리포트]
+    Q --> S[AI 기반 목표 조정]
+    
+    style A fill:#f9f,stroke:#333,stroke-width:2px
+    style E fill:#bbf,stroke:#333,stroke-width:2px
+    style G fill:#bfb,stroke:#333,stroke-width:2px
+    style J fill:#fbf,stroke:#333,stroke-width:2px
+    style Q fill:#fbb,stroke:#333,stroke-width:2px
