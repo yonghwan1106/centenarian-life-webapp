@@ -13,6 +13,11 @@ interface CommunityPost {
   comments_count: number
   created_at: string
   user_id: string
+  users?: {
+    id: string
+    name: string | null
+    email: string
+  } | null
 }
 
 interface Comment {
@@ -20,6 +25,11 @@ interface Comment {
   content: string
   created_at: string
   user_id: string
+  users?: {
+    id: string
+    name: string | null
+    email: string
+  } | null
 }
 
 export default function CommunityPosts() {
@@ -219,11 +229,11 @@ export default function CommunityPosts() {
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex items-center space-x-3">
                     <div className="w-10 h-10 bg-wellness-blue rounded-full flex items-center justify-center text-white font-semibold">
-                      U
+                      {post.users?.name?.charAt(0) || post.users?.email?.charAt(0) || 'U'}
                     </div>
                     <div>
                       <div className="font-medium text-gray-900">
-                        익명 사용자
+                        {post.users?.name || '익명 사용자'}
                       </div>
                       <div className="text-sm text-gray-500">
                         {formatDate(post.created_at)}
@@ -309,13 +319,13 @@ export default function CommunityPosts() {
                       {postComments.map((comment) => (
                         <div key={comment.id} className="flex space-x-3">
                           <div className="w-8 h-8 bg-gray-300 rounded-full flex items-center justify-center text-gray-600 text-sm font-semibold">
-                            C
+                            {comment.users?.name?.charAt(0) || comment.users?.email?.charAt(0) || 'C'}
                           </div>
                           <div className="flex-1">
                             <div className="bg-gray-50 rounded-lg p-3">
                               <div className="flex items-center space-x-2 mb-1">
                                 <span className="text-sm font-medium text-gray-900">
-                                  익명 사용자
+                                  {comment.users?.name || '익명 사용자'}
                                 </span>
                                 <span className="text-xs text-gray-500">
                                   {formatDate(comment.created_at)}

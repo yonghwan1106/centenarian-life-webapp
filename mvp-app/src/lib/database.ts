@@ -135,7 +135,14 @@ export const database = {
     
     let query = supabase
       .from('community_posts')
-      .select('*')
+      .select(`
+        *,
+        users!community_posts_user_id_fkey (
+          id,
+          name,
+          email
+        )
+      `)
       .order('created_at', { ascending: false })
       .limit(limit)
     
@@ -169,7 +176,14 @@ export const database = {
   async getPostComments(postId: string) {
     const { data, error } = await supabase
       .from('community_comments')
-      .select('*')
+      .select(`
+        *,
+        users!community_comments_user_id_fkey (
+          id,
+          name,
+          email
+        )
+      `)
       .eq('post_id', postId)
       .order('created_at', { ascending: true })
     
