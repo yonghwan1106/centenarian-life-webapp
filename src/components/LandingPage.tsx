@@ -1,10 +1,54 @@
 'use client'
 
 import Link from 'next/link'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import Image from 'next/image'
+
+const heroSlides = [
+  {
+    id: 1,
+    title: "건강한 100세를 위한",
+    subtitle: "AI 웰니스 동반자",
+    description: "인공지능이 분석한 맞춤형 건강 조언과 체계적인 데이터 관리로 여러분의 건강한 100세 인생을 함께 만들어갑니다.",
+    image: "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2070&q=80",
+    gradient: "from-blue-900/70 to-green-900/70"
+  },
+  {
+    id: 2,
+    title: "스마트한 건강 관리",
+    subtitle: "데이터로 보는 나의 건강",
+    description: "심박수, 혈압, 수면 패턴까지 모든 건강 지표를 체계적으로 추적하고 인사이트를 얻으세요.",
+    image: "https://images.unsplash.com/photo-1559757148-5c350d0d3c56?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2069&q=80",
+    gradient: "from-purple-900/70 to-blue-900/70"
+  },
+  {
+    id: 3,
+    title: "AI가 제안하는",
+    subtitle: "맞춤형 건강 솔루션",
+    description: "OpenAI GPT-4가 분석한 개인화된 운동, 영양, 수면 가이드로 더 나은 라이프스타일을 만들어보세요.",
+    image: "https://images.unsplash.com/photo-1506126613408-eca07ce68773?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2099&q=80",
+    gradient: "from-green-900/70 to-teal-900/70"
+  },
+  {
+    id: 4,
+    title: "함께하는 건강 여정",
+    subtitle: "커뮤니티와 소통하며",
+    description: "같은 목표를 가진 사람들과 경험을 나누고 서로 동기부여하며 함께 성장하는 건강한 라이프스타일.",
+    image: "https://images.unsplash.com/photo-1544367567-0f2fcb009e0b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=2120&q=80",
+    gradient: "from-orange-900/70 to-red-900/70"
+  }
+]
 
 export default function LandingPage() {
   const [showLogin, setShowLogin] = useState(false)
+  const [currentSlide, setCurrentSlide] = useState(0)
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % heroSlides.length)
+    }, 5000)
+    return () => clearInterval(timer)
+  }, [])
 
   if (showLogin) {
     const LoginForm = require('./LoginForm').default
@@ -12,9 +56,9 @@ export default function LandingPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+    <div className="min-h-screen">
       {/* 헤더 */}
-      <header className="bg-white/80 backdrop-blur-sm shadow-sm sticky top-0 z-50">
+      <header className="bg-white/90 backdrop-blur-sm shadow-sm fixed top-0 left-0 right-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center py-4">
             <div className="flex items-center space-x-2">
@@ -33,33 +77,104 @@ export default function LandingPage() {
         </div>
       </header>
 
-      {/* 히어로 섹션 */}
-      <section className="py-20 px-4">
-        <div className="max-w-6xl mx-auto text-center">
-          <h2 className="text-5xl md:text-6xl font-bold text-gray-800 mb-6">
-            건강한 <span className="bg-gradient-to-r from-blue-600 to-green-600 bg-clip-text text-transparent">100세</span>를 위한
-          </h2>
-          <h3 className="text-4xl md:text-5xl font-bold text-gray-700 mb-8">
-            AI 웰니스 동반자
-          </h3>
-          <p className="text-xl text-gray-600 mb-12 max-w-3xl mx-auto leading-relaxed">
-            인공지능이 분석한 맞춤형 건강 조언과 체계적인 데이터 관리로 
-            여러분의 건강한 100세 인생을 함께 만들어갑니다.
-          </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <button
-              onClick={() => setShowLogin(true)}
-              className="bg-wellness-blue text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-700 transition-colors shadow-lg"
-            >
-              무료로 시작하기 🚀
-            </button>
-            <button
-              onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
-              className="border-2 border-wellness-blue text-wellness-blue px-8 py-4 rounded-lg text-lg font-semibold hover:bg-blue-50 transition-colors"
-            >
-              기능 살펴보기
-            </button>
+      {/* 풀스크린 히어로 슬라이더 */}
+      <section className="relative h-screen overflow-hidden">
+        {heroSlides.map((slide, index) => (
+          <div
+            key={slide.id}
+            className={`absolute inset-0 transition-opacity duration-1000 ${
+              index === currentSlide ? 'opacity-100' : 'opacity-0'
+            }`}
+          >
+            {/* 배경 이미지 */}
+            <div className="absolute inset-0">
+              <Image
+                src={slide.image}
+                alt={slide.title}
+                fill
+                className="object-cover"
+                priority={index === 0}
+                quality={90}
+              />
+              <div className={`absolute inset-0 bg-gradient-to-r ${slide.gradient}`} />
+            </div>
+
+            {/* 콘텐츠 */}
+            <div className="relative z-10 h-full flex items-center justify-center">
+              <div className="max-w-6xl mx-auto px-4 text-center text-white">
+                <h2 className="text-4xl md:text-6xl lg:text-7xl font-bold mb-4">
+                  {slide.title}
+                </h2>
+                <h3 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-8 text-yellow-300">
+                  {slide.subtitle}
+                </h3>
+                <p className="text-lg md:text-xl lg:text-2xl mb-12 max-w-4xl mx-auto leading-relaxed text-gray-100">
+                  {slide.description}
+                </p>
+                <div className="flex flex-col sm:flex-row gap-4 justify-center">
+                  <button
+                    onClick={() => setShowLogin(true)}
+                    className="bg-white text-gray-800 px-8 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-colors shadow-lg"
+                  >
+                    무료로 시작하기 🚀
+                  </button>
+                  <button
+                    onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+                    className="border-2 border-white text-white px-8 py-4 rounded-lg text-lg font-semibold hover:bg-white/10 transition-colors"
+                  >
+                    기능 살펴보기
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
+        ))}
+
+        {/* 슬라이드 인디케이터 */}
+        <div className="absolute bottom-8 left-1/2 transform -translate-x-1/2 z-20">
+          <div className="flex space-x-3">
+            {heroSlides.map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setCurrentSlide(index)}
+                className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                  index === currentSlide 
+                    ? 'bg-white scale-125' 
+                    : 'bg-white/50 hover:bg-white/75'
+                }`}
+              />
+            ))}
+          </div>
+        </div>
+
+        {/* 네비게이션 화살표 */}
+        <button
+          onClick={() => setCurrentSlide((prev) => (prev - 1 + heroSlides.length) % heroSlides.length)}
+          className="absolute left-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-colors"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+        <button
+          onClick={() => setCurrentSlide((prev) => (prev + 1) % heroSlides.length)}
+          className="absolute right-4 top-1/2 transform -translate-y-1/2 z-20 bg-white/20 hover:bg-white/30 text-white p-3 rounded-full transition-colors"
+        >
+          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+
+        {/* 스크롤 다운 힌트 */}
+        <div className="absolute bottom-20 left-1/2 transform -translate-x-1/2 z-20 animate-bounce">
+          <button
+            onClick={() => document.getElementById('features')?.scrollIntoView({ behavior: 'smooth' })}
+            className="text-white hover:text-yellow-300 transition-colors"
+          >
+            <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </button>
         </div>
       </section>
 
