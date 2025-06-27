@@ -62,9 +62,10 @@ export const database = {
       .from('user_profiles')
       .select('*')
       .eq('user_id', userId)
-      .single()
+      .limit(1)
     
-    return { data, error }
+    // Return the first item if data exists, null if no profile
+    return { data: data && data.length > 0 ? data[0] : null, error }
   },
 
   async updateUserProfile(userId: string, updates: Partial<UserProfile>) {

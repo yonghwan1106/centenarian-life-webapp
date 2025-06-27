@@ -24,13 +24,20 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Failed to fetch health data' }, { status: 500 })
     }
 
-    // 사용자 프로필 가져오기
+    // 사용자 프로필 가져오기 (없어도 괜찮음)
     const { data: userProfile, error: profileError } = await database.getUserProfile(user.id)
     if (profileError) {
-      return NextResponse.json({ error: 'Failed to fetch user profile' }, { status: 500 })
+      console.warn('Failed to fetch user profile:', profileError)
     }
 
-    // AI 추천 생성
+    if (!healthData || healthData.length === 0) {
+      return NextResponse.json({ 
+        recommendations: [],
+        message: '건강 데이터를 먼저 입력해주시면 AI가 분석해드릴게요! 💪'
+      })
+    }
+
+    // AI 추천 생성 (프로필이 없어도 건강 데이터로 추천 생성)
     const recommendations = await generateHealthRecommendations(healthData, userProfile)
 
     // 추천을 데이터베이스에 저장
