@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { database } from '@/lib/database'
-import { supabase } from '@/lib/supabase'
+import { supabase, supabaseAdmin } from '@/lib/supabase'
 
 export async function GET(request: NextRequest) {
   try {
@@ -27,13 +27,22 @@ export async function POST(request: NextRequest) {
     // Authorization 헤더에서 토큰 가져오기
     const authorization = request.headers.get('authorization')
     if (!authorization) {
+      console.error('No authorization header')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
     const token = authorization.replace('Bearer ', '')
-    const { data: { user }, error: authError } = await supabase.auth.getUser(token)
     
-    if (authError || !user) {
+    // 서버측에서 토큰 검증
+    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(token)
+    
+    if (authError) {
+      console.error('Auth error:', authError)
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+    }
+    
+    if (!user) {
+      console.error('No user found')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -44,14 +53,51 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const { data: post, error } = await database.createCommunityPost({
-      user_id: user.id,
-      title,
-      content,
-      category
-    })
+    console.log('Creating post for user:', user.id)
+
+    // 사용자 레코드 확인 및 생성
+    const { data: existingUser } = await supabaseAdmin
+      .from('users')
+      .select('id')
+      .eq('id', user.id)
+      .single()
+
+    if (!existingUser) {
+      console.log('Creating user record for:', user.id)
+      const { error: userError } = await supabaseAdmin
+        .from('users')
+        .insert({
+          id: user.id,
+          email: user.email || '',
+          name: user.user_metadata?.name || null
+        })
+      
+      if (userError) {
+        console.error('Failed to create user record:', userError)
+        return NextResponse.json({ error: 'Failed to create user' }, { status: 500 })
+      }
+    }
+
+    // 관리자 클라이언트로 직접 삽입
+    const { data: post, error } = await supabaseAdmin
+      .from('community_posts')
+      .insert({
+        user_id: user.id,
+        title,
+        content,
+        category
+      })
+      .select(`
+        *,
+        users:user_id (
+          name,
+          email
+        )
+      `)
+      .single()
 
     if (error) {
+      console.error('Database error:', error)
       return NextResponse.json({ error: 'Failed to create post' }, { status: 500 })
     }
 

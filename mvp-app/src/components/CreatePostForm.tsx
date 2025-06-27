@@ -33,11 +33,21 @@ export default function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
     setError('')
 
     try {
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.access_token) {
-        setError('인증이 필요합니다.')
+      // 세션 새로고침 시도
+      const { data: { session }, error: sessionError } = await supabase.auth.getSession()
+      
+      if (sessionError) {
+        console.error('세션 오류:', sessionError)
+        setError('인증 세션이 만료되었습니다. 다시 로그인해주세요.')
         return
       }
+      
+      if (!session?.access_token) {
+        setError('인증이 필요합니다. 다시 로그인해주세요.')
+        return
+      }
+
+      console.log('토큰으로 API 요청:', session.access_token.substring(0, 20) + '...')
 
       const response = await fetch('/api/community/posts', {
         method: 'POST',
@@ -61,9 +71,15 @@ export default function CreatePostForm({ onPostCreated }: CreatePostFormProps) {
         setIsOpen(false)
         onPostCreated()
       } else {
-        setError(data.error || '게시글 작성 중 오류가 발생했습니다.')
+        console.error('API 응답 오류:', response.status, data)
+        if (response.status === 401) {
+          setError('인증이 만료되었습니다. 페이지를 새로고침하거나 다시 로그인해주세요.')
+        } else {
+          setError(data.error || '게시글 작성 중 오류가 발생했습니다.')
+        }
       }
     } catch (err) {
+      console.error('요청 오류:', err)
       setError('네트워크 오류가 발생했습니다.')
     } finally {
       setLoading(false)

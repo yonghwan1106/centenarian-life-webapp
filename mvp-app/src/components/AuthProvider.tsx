@@ -27,13 +27,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setSession(session)
       setUser(session?.user as AuthUser || null)
       setLoading(false)
+    }).catch((error) => {
+      console.error('초기 세션 확인 오류:', error)
+      setLoading(false)
     })
 
     // 인증 상태 변경 감지
     const { data: { subscription } } = auth.onAuthStateChange(
       async (event, session) => {
-        setSession(session)
-        setUser(session?.user as AuthUser || null)
+        console.log('Auth state change:', event, session?.user?.id)
+        
+        if (event === 'SIGNED_OUT' || !session) {
+          setSession(null)
+          setUser(null)
+        } else if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
+          setSession(session)
+          setUser(session?.user as AuthUser || null)
+        }
+        
         setLoading(false)
       }
     )
