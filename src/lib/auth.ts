@@ -2,10 +2,10 @@ import { supabase } from './supabase'
 import type { User } from '@supabase/supabase-js'
 
 export interface AuthUser extends User {
-  user_metadata?: {
+  user_metadata: {
     name?: string
     avatar_url?: string
-  }
+  } & Record<string, any>
 }
 
 export const auth = {
@@ -16,7 +16,9 @@ export const auth = {
       options: {
         data: {
           name: name || '',
-        }
+        },
+        // 개발 환경에서는 이메일 인증 우회 (프로덕션에서는 제거 필요)
+        emailRedirectTo: undefined
       }
     })
     

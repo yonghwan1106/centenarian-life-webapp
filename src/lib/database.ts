@@ -31,9 +31,9 @@ export const database = {
       .eq('user_id', userId)
       .order('recorded_at', { ascending: false })
       .limit(1)
-      .single()
     
-    return { data, error }
+    // Return the first item if data exists, null if no data
+    return { data: data && data.length > 0 ? data[0] : null, error }
   },
 
   async updateHealthData(id: string, updates: Partial<HealthData>) {
@@ -68,10 +68,13 @@ export const database = {
   },
 
   async updateUserProfile(userId: string, updates: Partial<UserProfile>) {
+    // upsert를 사용하여 프로필이 없으면 생성하고, 있으면 업데이트
     const { data, error } = await supabase
       .from('user_profiles')
-      .update(updates)
-      .eq('user_id', userId)
+      .upsert({
+        user_id: userId,
+        ...updates
+      })
       .select()
       .single()
     

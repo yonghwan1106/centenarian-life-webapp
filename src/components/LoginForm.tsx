@@ -11,11 +11,13 @@ export default function LoginForm() {
   const [isSignUp, setIsSignUp] = useState(false)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
+    setSuccess('')
 
     try {
       const result = isSignUp 
@@ -23,7 +25,28 @@ export default function LoginForm() {
         : await signIn(email, password)
 
       if (result.error) {
-        setError(result.error.message)
+        // 에러 메시지를 더 사용자 친화적으로 변경
+        if (result.error.message.includes('Invalid login credentials')) {
+          setError('이메일 또는 비밀번호가 올바르지 않습니다.')
+        } else if (result.error.message.includes('Email not confirmed')) {
+          setError('이메일 인증이 필요합니다. 이메일을 확인해주세요.')
+        } else {
+          setError(result.error.message)
+        }
+      } else if (isSignUp && result.user) {
+        // 회원가입 성공 메시지
+        if (result.session) {
+          // 즉시 로그인됨
+          setSuccess('회원가입이 완료되었습니다! 자동으로 로그인됩니다.')
+        } else {
+          // 이메일 인증 필요
+          setSuccess('회원가입이 완료되었습니다! 이메일을 확인하여 인증을 완료해주세요.')
+        }
+        // 폼 초기화
+        setEmail('')
+        setPassword('')
+        setName('')
+        setIsSignUp(false)
       }
     } catch (err) {
       setError('예상치 못한 오류가 발생했습니다.')
@@ -97,8 +120,14 @@ export default function LoginForm() {
             </div>
 
             {error && (
-              <div className="text-red-600 text-sm text-center">
+              <div className="text-red-600 text-sm text-center bg-red-50 border border-red-200 rounded p-3">
                 {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="text-green-600 text-sm text-center bg-green-50 border border-green-200 rounded p-3">
+                {success}
               </div>
             )}
 
