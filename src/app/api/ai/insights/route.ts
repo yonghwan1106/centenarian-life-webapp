@@ -8,6 +8,7 @@ export async function POST(request: NextRequest) {
     // Authorization 헤더에서 토큰 가져오기
     const authorization = request.headers.get('authorization')
     if (!authorization) {
+      console.log('No authorization header')
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
 
@@ -15,20 +16,29 @@ export async function POST(request: NextRequest) {
     const { data: { user }, error: authError } = await supabase.auth.getUser(token)
     
     if (authError || !user) {
+      console.log('Auth error:', authError)
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
     }
+
+    console.log('User ID for AI insights:', user.id)
 
     // 최근 건강 데이터 가져오기
     const { data: latestHealthData, error: healthError } = await database.getLatestHealthData(user.id)
     
+    console.log('Latest health data:', latestHealthData)
+    console.log('Health data error:', healthError)
+    
     if (healthError) {
+      console.error('Failed to fetch health data:', healthError)
       return NextResponse.json({ error: 'Failed to fetch health data' }, { status: 500 })
     }
 
     if (!latestHealthData) {
+      console.log('No health data found for user:', user.id)
       return NextResponse.json({ 
         insight: '건강 데이터를 먼저 입력해주시면 AI가 분석해드릴게요! 💪',
-        message: 'No health data available'
+        message: 'No health data available',
+        userId: user.id
       })
     }
 

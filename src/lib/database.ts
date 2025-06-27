@@ -25,15 +25,29 @@ export const database = {
   },
 
   async getLatestHealthData(userId: string) {
+    console.log('Fetching health data for user:', userId)
+    
     const { data, error } = await supabase
       .from('health_data')
       .select('*')
       .eq('user_id', userId)
       .order('recorded_at', { ascending: false })
-      .limit(1)
+      .limit(10) // 더 많은 레코드를 가져와서 유효한 데이터 찾기
     
-    // Return the first item if data exists, null if no data
-    return { data: data && data.length > 0 ? data[0] : null, error }
+    console.log('Health data query result:', { data, error, count: data?.length })
+    
+    // 유효한 건강 데이터를 찾기 (모든 필드가 null이 아닌 것)
+    let result = null
+    if (data && data.length > 0) {
+      result = data.find(item => 
+        item.heart_rate || item.blood_pressure_systolic || item.weight || 
+        item.steps || item.sleep_hours || item.mood_score
+      ) || data[0] // 유효한 데이터가 없으면 첫 번째 항목 반환
+    }
+    
+    console.log('Returning health data:', result)
+    
+    return { data: result, error }
   },
 
   async updateHealthData(id: string, updates: Partial<HealthData>) {
