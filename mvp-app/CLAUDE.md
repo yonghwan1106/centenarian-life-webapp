@@ -1,5 +1,6 @@
 # 센테니얼 라이프 MVP - Claude 개발 가이드
 
+
 ## 프로젝트 개요
 - **프로젝트명**: 센테니얼 라이프 (Centenarian Life) MVP
 - **목적**: 1인 스타트업 AI 기반 웰니스 앱
@@ -241,4 +242,8 @@ tail -f server.log
 ## 연락처 및 문서
 - **README**: 프로젝트 전체 개요
 - **데이터베이스**: `/database/schema.sql` 참조
-- **API 문서**: 각 라우트 파일 내 주석 참조
+
+
+**API 문서**: 각 라우트 파일 내 주석 참조
+
+#너는 mcp(model context protocol)을 사용할 수 있어
