@@ -14,6 +14,7 @@ export default function AppNavigation({ variant = 'tabs' }: NavigationProps) {
 
   const navItems = [
     { href: '/', label: '대시보드', icon: '📊' },
+    { href: '/checklist', label: '체크리스트', icon: '✅' },
     { href: '/health', label: '건강 데이터', icon: '💪' },
     { href: '/ai', label: 'AI 추천', icon: '🤖' },
     { href: '/community', label: '커뮤니티', icon: '👥' },
