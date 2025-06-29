@@ -20,8 +20,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null)
   const [session, setSession] = useState<Session | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isHydrated, setIsHydrated] = useState(false)
 
   useEffect(() => {
+    setIsHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    if (!isHydrated) return
+
     // 초기 세션 확인
     auth.getSession().then((session) => {
       setSession(session)
@@ -39,7 +46,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     )
 
     return () => subscription.unsubscribe()
-  }, [])
+  }, [isHydrated])
 
   const value = {
     user,
@@ -49,6 +56,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     signUp: auth.signUp,
     signOut: auth.signOut,
     resetPassword: auth.resetPassword,
+  }
+
+  if (!isHydrated) {
+    return null
   }
 
   return (

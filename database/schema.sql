@@ -239,6 +239,45 @@ BEGIN
 END;
 $$ LANGUAGE plpgsql;
 
+-- Daily wellness checklist table
+CREATE TABLE public.daily_wellness_checklists (
+    id UUID DEFAULT uuid_generate_v4() PRIMARY KEY,
+    user_id UUID REFERENCES public.users(id) ON DELETE CASCADE,
+    checklist_date DATE NOT NULL,
+    checklist_data JSONB NOT NULL, -- stores the checked items
+    reflection_data JSONB, -- stores daily reflection
+    completion_percentage INTEGER DEFAULT 0,
+    total_items INTEGER DEFAULT 0,
+    completed_items INTEGER DEFAULT 0,
+    created_at TIMESTAMPTZ DEFAULT NOW(),
+    updated_at TIMESTAMPTZ DEFAULT NOW(),
+    UNIQUE(user_id, checklist_date)
+);
+
+-- Index for daily checklist queries
+CREATE INDEX idx_daily_wellness_checklists_user_date ON public.daily_wellness_checklists(user_id, checklist_date DESC);
+
+-- Enable RLS for daily wellness checklists
+ALTER TABLE public.daily_wellness_checklists ENABLE ROW LEVEL SECURITY;
+
+-- RLS policies for daily wellness checklists
+CREATE POLICY "Users can view own checklists" ON public.daily_wellness_checklists
+    FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can insert own checklists" ON public.daily_wellness_checklists
+    FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own checklists" ON public.daily_wellness_checklists
+    FOR UPDATE USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can delete own checklists" ON public.daily_wellness_checklists
+    FOR DELETE USING (auth.uid() = user_id);
+
+-- Apply updated_at trigger to daily wellness checklists
+CREATE TRIGGER handle_daily_wellness_checklists_updated_at
+    BEFORE UPDATE ON public.daily_wellness_checklists
+    FOR EACH ROW EXECUTE FUNCTION public.handle_updated_at();
+
 -- Triggers to update post stats
 CREATE TRIGGER update_comments_count
     AFTER INSERT OR DELETE ON public.community_comments

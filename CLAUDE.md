@@ -1,244 +1,217 @@
-# 센테니얼 라이프 MVP - Claude 개발 가이드
+# CLAUDE.md
 
-## 프로젝트 개요
-- **프로젝트명**: 센테니얼 라이프 (Centenarian Life) MVP
-- **목적**: 1인 스타트업 AI 기반 웰니스 앱
-- **기술 스택**: Next.js 14, TypeScript, Tailwind CSS, Supabase, OpenAI API, Recharts
-- **현재 상태**: ✅ MVP 95% 완성 (거의 완료!)
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## 개발 환경 설정
+## Project Overview
 
-### 필수 명령어
+**Centenarian Life MVP** is an AI-powered wellness platform built for the Korean market, focusing on comprehensive health management for longevity. This is a solo startup project implementing a full-stack health tracking and AI recommendation system.
+
+### Tech Stack
+- **Frontend**: Next.js 14 (App Router), React 18, TypeScript, Tailwind CSS
+- **Backend**: Supabase (PostgreSQL, Auth, Real-time), Next.js API Routes
+- **AI**: OpenAI GPT-4 for personalized health insights
+- **Charts**: Recharts for data visualization
+- **UI**: Framer Motion, React Hook Form, React Hot Toast
+
+## Essential Commands
+
 ```bash
-# 개발 서버 실행
-npm run dev
+# Development
+npm run dev              # Start development server
+npm run type-check       # TypeScript type checking (critical - run before commits)
+npm run build           # Production build
+npm run lint            # ESLint checking
 
-# 타입 체크
-npm run type-check
-
-# 빌드
-npm run build
-
-# 린트
-npm run lint
+# Dependencies
+npm install             # Install dependencies
+rm -rf node_modules package-lock.json && npm install  # Clean reinstall
 ```
 
-### 환경 변수 (필수)
-`.env.local` 파일에서 다음 키들이 완벽하게 설정됨:
-- `NEXT_PUBLIC_SUPABASE_URL`
-- `NEXT_PUBLIC_SUPABASE_ANON_KEY` 
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `OPENAI_API_KEY`
+## Core Architecture
 
-## 현재 구현 완료된 기능
+### Authentication & State Management
+The app uses a centralized authentication pattern with Supabase:
+- `AuthProvider` (Context) wraps the entire app in `layout.tsx`
+- Authentication state is managed globally and automatically syncs with Supabase Auth
+- All authenticated routes use `useAuth()` hook for user data and session management
+- Protected routes redirect to landing page if user is not authenticated
 
-### ✅ 인증 시스템 (완성)
-- 회원가입/로그인 (Supabase Auth)
-- 비밀번호 재설정
-- 보호된 라우트
-- 사용자 세션 관리
+### Database Architecture
+The application uses Supabase with Row Level Security (RLS):
+- **Users**: Extends Supabase auth.users with profile data
+- **Health Data**: Time-series health metrics (heart rate, weight, mood, etc.)
+- **AI Recommendations**: GPT-4 generated personalized health advice
+- **Community**: Posts, comments, and likes system
+- **User Profiles**: Detailed user settings and health goals
 
-### ✅ 건강 데이터 관리 (완성)
-- 종합 건강 데이터 입력 폼 (심박수, 혈압, 체중, 걸음수, 수면, 기분)
-- 실시간 데이터 목록 표시
-- Supabase 실시간 저장
-- 데이터 검증 및 에러 핸들링
-
-### ✅ AI 기능 (완성)
-- OpenAI GPT-4 기반 건강 추천 시스템
-- 개인화된 건강 인사이트 생성
-- 카테고리별 추천 (운동, 영양, 수면, 정신건강)
-- 우선순위 및 신뢰도 스코어링
-
-### ✅ 커뮤니티 기능 (완성)
-- 게시글 작성/조회/수정/삭제
-- 댓글 시스템 (실시간)
-- 좋아요 기능
-- 카테고리 필터링
-- 사용자 프로필 연동
-
-### ✅ 대시보드 & 데이터 시각화 (NEW!)
-- **건강 통계 요약**: 총 기록수, 평균 체중/심박수/수면시간
-- **인터랙티브 차트**: 
-  - 체중 & 심박수 추세 (Line Chart)
-  - 수면 시간 (Bar Chart) 
-  - 걸음수 추적 (Bar Chart)
-- **기분 상태 표시**: 이모지와 점수로 시각화
-- **반응형 디자인**: 모바일/데스크톱 완벽 대응
-- **빈 상태 처리**: 데이터 없을 때 친근한 안내
-
-### ✅ 사용자 프로필 관리 (NEW!)
-- **기본 정보**: 나이, 성별, 키, 체중 설정
-- **활동 수준**: 5단계 활동 레벨 선택
-- **건강 목표**: 동적 목표 추가/제거 (태그 형태)
-- **기존 질환**: 의료 조건 관리 시스템
-- **실시간 저장**: Toast 알림과 함께 즉시 DB 업데이트
-- **전용 API**: `/api/profile` (GET, PUT) 보안 인증
-
-### ✅ 통합 네비게이션 시스템 (NEW!)
-- **공통 컴포넌트**: `AppNavigation` + `PageLayout`
-- **일관된 디자인**: 모든 페이지 동일한 헤더/네비게이션
-- **활성 페이지 표시**: 현재 페이지 하이라이트
-- **반응형**: 모바일에서 스크롤 가능한 탭
-- **아이콘 포함**: 각 메뉴에 의미있는 이모지
-
-### ✅ 데이터베이스 스키마 (완성)
-- 완전한 테이블 구조 (10개 테이블)
-- RLS 보안 정책 완비
-- 자동 트리거 및 통계 업데이트
-- 성능 최적화 인덱스
-
-## 🎉 MVP 완성도 95% - 거의 완료!
-
-### ✅ 최근 완성된 주요 기능들
-1. **대시보드 데이터 시각화** ✅
-   - Recharts 기반 인터랙티브 차트
-   - 건강 통계 요약 카드
-   - 반응형 디자인
-
-2. **사용자 프로필 관리** ✅
-   - 완전한 프로필 설정 UI
-   - 동적 목표/질환 관리
-   - 전용 API 엔드포인트
-
-3. **통합 네비게이션** ✅
-   - 일관된 네비게이션 시스템
-   - 모든 링크 정상 작동
-   - 활성 페이지 하이라이트
-
-### 🔧 남은 작업 (5%)
-1. **환경 설정 문서화**
-   - `.env.local.example` 파일 생성
-   - 새 개발자를 위한 설정 가이드
-
-2. **최종 테스트 및 최적화**
-   - 성능 최적화
-   - 모바일 UX 개선
-   - 에러 핸들링 보완
-
-## 파일 구조 및 컨벤션
-
-### 주요 디렉토리
+### Page Layout System
+Consistent UI is achieved through the `PageLayout` component:
+```typescript
+// Used in all main pages
+<PageLayout title="Page Title" description="Description">
+  {content}
+</PageLayout>
 ```
-src/
-├── app/                    # Next.js 13+ App Router
-│   ├── api/               # API 라우트
-│   │   ├── ai/           # AI 관련 API
-│   │   ├── community/    # 커뮤니티 API
-│   │   ├── profile/      # 프로필 API (NEW!)
-│   │   └── recommendations/ # 추천 API
-│   ├── health/           # 건강 데이터 페이지
-│   ├── community/        # 커뮤니티 페이지
-│   ├── ai/              # AI 인사이트 페이지
-│   ├── profile/         # 프로필 관리 페이지 (NEW!)
-│   └── page.tsx         # 대시보드 홈페이지
-├── components/           # 재사용 컴포넌트
-│   ├── AppNavigation.tsx    # 통합 네비게이션 (NEW!)
-│   ├── HealthDashboard.tsx  # 대시보드 차트 (NEW!)
-│   ├── UserProfileForm.tsx  # 프로필 폼 (NEW!)
-│   ├── AuthProvider.tsx     # 인증 컨텍스트
-│   ├── HealthDataForm.tsx   # 건강 데이터 입력
-│   ├── AIRecommendations.tsx # AI 추천
-│   └── CommunityPosts.tsx   # 커뮤니티 게시글
-├── lib/                  # 유틸리티 함수
-│   ├── auth.ts          # 인증 로직
-│   ├── database.ts      # DB 함수 (확장됨)
-│   ├── openai.ts        # AI 통합
-│   └── supabase.ts      # Supabase 클라이언트
-└── types/               # TypeScript 타입 정의
+This provides unified navigation with `AppNavigation` component (header + tabs).
+
+### API Architecture
+RESTful API structure using Next.js API routes:
+- `/api/ai/insights` - AI health analysis using OpenAI GPT-4
+- `/api/recommendations/*` - Health recommendation CRUD
+- `/api/profile` - User profile management  
+- `/api/community/posts/*` - Community features
+- `/api/checklist` - Daily wellness checklist CRUD operations
+- `/api/checklist/stats` - Checklist statistics and analytics
+
+## Key Features Implemented
+
+### 1. Daily Wellness Checklist (NEW)
+**Location**: `/checklist` page, `DailyWellnessChecklist` component
+
+Comprehensive wellness tracking across 10 life domains with full database integration:
+- 49 actionable checklist items across physical health, mental health, nutrition, exercise, sleep, social connections, cognitive function, financial stability, purpose, and stress management
+- Priority system (high/medium/low) for each item
+- Real-time progress tracking with category-wise completion rates
+- Daily reflection journal with achievements, improvements, and tomorrow's goals
+- **Database persistence with auto-save**: Data saved to `daily_wellness_checklists` table with debounced updates
+- **Fallback to localStorage**: Ensures data safety if database is unavailable
+- **Dashboard integration**: Weekly stats displayed on main dashboard
+- Fully responsive accordion-style interface with save status indicators
+
+**Database Schema**: `daily_wellness_checklists` table stores:
+- `checklist_data` (JSONB): Checked items state
+- `reflection_data` (JSONB): Daily reflection entries
+- `completion_percentage`, `total_items`, `completed_items`: Pre-calculated stats
+- Row Level Security for user isolation
+
+### 2. Health Dashboard
+Interactive data visualization using Recharts:
+- Health metrics summary cards (heart rate, weight, sleep averages)
+- Trend charts for weight and heart rate over time
+- Sleep duration and step count bar charts
+- Mood tracking with emoji visualization
+- Empty state handling for new users
+
+### 3. AI-Powered Insights
+Integration with OpenAI GPT-4:
+- Analyzes user's recent health data to provide personalized recommendations
+- Categorizes advice into exercise, nutrition, sleep, and mental health
+- Includes priority levels and confidence scores
+- Error handling for API rate limits and failures
+
+### 4. Community Platform
+Full social features:
+- Post creation with rich text and categories
+- Real-time commenting system
+- Like/unlike functionality with optimistic updates
+- Category filtering (general, exercise, nutrition, mental health, tips)
+- User profile integration
+
+## Environment Variables Required
+
+Create `.env.local` with:
+```env
+# Supabase (Required)
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+SUPABASE_SERVICE_ROLE_KEY=your_service_role_key
+
+# OpenAI (Required)
+OPENAI_API_KEY=your_openai_api_key
 ```
 
-### API 라우트
-- `/api/ai/insights` - AI 건강 인사이트 생성
-- `/api/recommendations` - 건강 추천 CRUD
-- `/api/recommendations/[id]` - 개별 추천 관리
-- `/api/profile` - 사용자 프로필 CRUD (NEW!)
-- `/api/community/posts` - 커뮤니티 게시글 CRUD
-- `/api/community/posts/[id]/comments` - 댓글 CRUD
-- `/api/community/posts/[id]/like` - 좋아요 토글
+## Database Schema Critical Points
 
-## 개발 시 주의사항
+1. **RLS Policies**: All tables use Row Level Security - users can only access their own data
+2. **Triggers**: `updated_at` fields auto-update via PostgreSQL triggers
+3. **Indexes**: Performance optimized for user_id + date queries on health_data
+4. **Relationships**: Proper foreign key cascading deletes implemented
 
-### 코딩 컨벤션
-- TypeScript 엄격 모드 사용
-- 한국어 UI 텍스트
-- Tailwind CSS 유틸리티 클래스 사용
-- 에러 핸들링 필수
+## Component Patterns
 
-### 보안 고려사항
-- Supabase RLS 정책 준수
-- 인증된 사용자만 데이터 접근
-- 민감한 정보 로깅 금지
+### Client vs Server Components
+- **Server Components**: Page layouts, static content, initial data fetching
+- **Client Components**: Interactive forms, real-time updates, authentication hooks
+- All components requiring `useAuth()`, `useState`, or event handlers must be client components
 
-### 성능 최적화
-- 컴포넌트 lazy loading
-- API 응답 캐싱 고려
-- 이미지 최적화
-
-## 테스트 및 배포
-
-### 로컬 테스트
-```bash
-# 타입 체크 (에러 없어야 함)
-npm run type-check
-
-# 빌드 테스트
-npm run build
-
-# 린트 체크
-npm run lint
+### Form Handling
+Uses React Hook Form with Zod validation:
+```typescript
+// Pattern used throughout the app
+const form = useForm<FormData>({
+  resolver: zodResolver(schema),
+  defaultValues: {...}
+})
 ```
 
-### 배포 (Vercel)
-```bash
-# 프로덕션 빌드
-npm run build
-
-# Vercel 배포
-vercel --prod
+### Error Handling
+Consistent error handling with React Hot Toast:
+```typescript
+// Used in all API calls
+try {
+  // API operation
+  toast.success('Success message')
+} catch (error) {
+  toast.error('Error message')
+}
 ```
 
-## 🎯 MVP 완성 현황
+## Styling System
 
-### ✅ 완료된 핵심 기능들
-1. **대시보드 & 시각화** ✅ - Recharts 기반 인터랙티브 차트
-2. **프로필 관리** ✅ - 완전한 사용자 설정 시스템  
-3. **통합 네비게이션** ✅ - 일관된 UX/UI
-4. **AI 추천 시스템** ✅ - GPT-4 기반 맞춤 조언
-5. **커뮤니티 플랫폼** ✅ - 소셜 기능 완비
-6. **건강 데이터 관리** ✅ - 종합 추적 시스템
+### Tailwind Configuration
+Custom colors defined for wellness theme:
+- `wellness-blue`: #3b82f6
+- `wellness-green`: #10b981  
+- `wellness-purple`: #8b5cf6
 
-### 🔧 남은 작업 (5%)
-1. **최종 최적화** - 성능 및 모바일 UX 개선
-2. **프로덕션 준비** - 배포 최적화
+### Responsive Design
+Mobile-first approach using Tailwind breakpoints:
+- Base styles for mobile
+- `md:` prefix for tablet/desktop
+- Navigation switches from accordion to horizontal tabs on larger screens
 
-### 🚀 향후 확장 계획  
-1. **고급 분석**: 머신러닝 기반 예측
-2. **소셜 기능**: 친구 추가, 그룹 챌린지
-3. **웨어러블 연동**: Apple Health, Samsung Health
-4. **다국어**: 영어, 일본어 지원
+## Critical Development Notes
 
-## 문제 해결
+### Type Safety
+- **Always run `npm run type-check`** before commits - TypeScript errors will break the build
+- Database types are defined in `lib/supabase.ts` and should be kept in sync with schema
+- API routes include proper request/response typing
 
-### 자주 발생하는 이슈
-- **타입 에러**: `npm run type-check`로 확인
-- **빌드 실패**: 환경 변수 확인
-- **Supabase 연결**: 키 및 URL 검증
-- **AI API**: OpenAI 키 및 사용량 확인
+### Supabase Integration
+- All database operations go through Supabase client
+- Real-time subscriptions are used for live updates (comments, likes)
+- File uploads (if added) should use Supabase Storage with proper RLS
 
-### 유용한 명령어
-```bash
-# 의존성 재설치
-rm -rf node_modules package-lock.json && npm install
+### Performance Considerations
+- Health data queries are optimized with date-based indexes
+- Charts only render recent data (last 30 days) to prevent performance issues
+- Components use React.memo and useCallback where appropriate for expensive operations
 
-# 캐시 정리
-npm run build -- --debug
+### Error Boundaries
+The app includes proper error handling for:
+- Network failures (API calls)
+- Authentication timeouts  
+- Missing environment variables
+- Malformed data from database
 
-# 로그 확인
-tail -f server.log
-```
+## Common Debugging Issues
 
-## 연락처 및 문서
-- **README**: 프로젝트 전체 개요
-- **데이터베이스**: `/database/schema.sql` 참조
-- **API 문서**: 각 라우트 파일 내 주석 참조
+1. **Hydration Errors**: Usually caused by client-only data (localStorage) in server components
+2. **Authentication Issues**: Check Supabase keys and RLS policies
+3. **Type Errors**: Run `npm run type-check` - often caused by outdated database types
+4. **Build Failures**: Usually TypeScript errors that need fixing (don't ignore with build config)
+
+## UI/UX Patterns
+
+### Korean Localization
+- All user-facing text is in Korean
+- Date formats use Korean standards
+- UI patterns follow Korean web conventions
+
+### Wellness-Focused Design
+- Calming color palette with blues and greens
+- Emoji-heavy interface for emotional connection
+- Progress-focused UI with completion percentages
+- Encouragement messaging throughout the app
+
+This codebase represents a production-ready MVP with 95% feature completion. The architecture supports easy expansion for additional wellness features, AI capabilities, and social functionality.

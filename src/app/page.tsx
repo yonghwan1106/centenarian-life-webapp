@@ -30,7 +30,20 @@ export default function HomePage() {
       <HealthDashboard />
 
       {/* 빠른 액션 */}
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Link 
+          href="/checklist" 
+          className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow border-l-4 border-orange-500"
+        >
+          <div className="flex items-center">
+            <div className="text-3xl mr-4">✅</div>
+            <div>
+              <h3 className="font-semibold text-gray-800">일일 체크리스트</h3>
+              <p className="text-sm text-gray-600">10가지 웰니스 영역 관리</p>
+            </div>
+          </div>
+        </Link>
+
         <Link 
           href="/health" 
           className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition-shadow border-l-4 border-wellness-blue"

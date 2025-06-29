@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
 import { useAuth } from './AuthProvider'
 import { database } from '@/lib/database'
+import { supabase } from '@/lib/supabase'
 import type { HealthData } from '@/types'
 
 interface HealthStats {
@@ -15,17 +16,31 @@ interface HealthStats {
   weeklyData: any[]
 }
 
+interface ChecklistStats {
+  totalDays: number
+  averageCompletion: number
+  currentStreak: number
+  dailyStats: any[]
+}
+
 export default function HealthDashboard() {
   const { user } = useAuth()
   const [healthData, setHealthData] = useState<HealthData[]>([])
   const [stats, setStats] = useState<HealthStats | null>(null)
+  const [checklistStats, setChecklistStats] = useState<ChecklistStats | null>(null)
   const [loading, setLoading] = useState(true)
+  const [isHydrated, setIsHydrated] = useState(false)
 
   useEffect(() => {
-    if (user) {
+    setIsHydrated(true)
+  }, [])
+
+  useEffect(() => {
+    if (user && isHydrated) {
       fetchHealthData()
+      fetchChecklistStats()
     }
-  }, [user])
+  }, [user, isHydrated])
 
   const fetchHealthData = async () => {
     try {
@@ -44,6 +59,21 @@ export default function HealthDashboard() {
       console.error('Error:', error)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const fetchChecklistStats = async () => {
+    try {
+      if (!user?.id) return
+
+      const response = await fetch(`/api/checklist/stats?days=7&user_id=${user.id}`)
+      const data = await response.json()
+      
+      if (response.ok) {
+        setChecklistStats(data.stats)
+      }
+    } catch (error) {
+      console.error('Error fetching checklist stats:', error)
     }
   }
 
@@ -74,7 +104,7 @@ export default function HealthDashboard() {
     })
   }
 
-  if (loading) {
+  if (!isHydrated || loading) {
     return (
       <div className="bg-white rounded-lg shadow-lg p-6">
         <div className="animate-pulse">
@@ -127,6 +157,27 @@ export default function HealthDashboard() {
           <div className="text-sm text-gray-600">평균 수면</div>
         </div>
       </div>
+
+      {/* 체크리스트 통계 카드들 */}
+      {checklistStats && (
+        <div className="bg-gradient-to-r from-wellness-green to-wellness-blue rounded-xl p-6 text-white">
+          <h3 className="text-lg font-semibold mb-4">🗂️ 웰니스 체크리스트 요약 (최근 7일)</h3>
+          <div className="grid grid-cols-3 gap-4">
+            <div className="text-center">
+              <div className="text-3xl font-bold">{checklistStats.averageCompletion}%</div>
+              <div className="text-sm text-blue-100">평균 완성률</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold">{checklistStats.currentStreak}</div>
+              <div className="text-sm text-blue-100">연속 달성일</div>
+            </div>
+            <div className="text-center">
+              <div className="text-3xl font-bold">{checklistStats.totalDays}</div>
+              <div className="text-sm text-blue-100">총 기록일</div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* 차트 섹션 */}
       {stats.weeklyData.length > 0 && (
