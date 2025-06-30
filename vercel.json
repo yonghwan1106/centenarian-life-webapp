@@ -1,5 +1,14 @@
 {
-  "buildCommand": "cd mvp-app && npm run build",
-  "outputDirectory": "mvp-app/.next",
-  "installCommand": "cd mvp-app && npm install"
+  "version": 2,
+  "builds": [
+    {
+      "src": "mvp-app/package.json",
+      "use": "@vercel/next",
+      "config": {
+        "projectSettings": {
+          "rootDirectory": "mvp-app"
+        }
+      }
+    }
+  ]
 }
