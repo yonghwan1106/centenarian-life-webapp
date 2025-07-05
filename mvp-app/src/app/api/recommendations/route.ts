@@ -3,6 +3,8 @@ import { generateHealthRecommendations } from '@/lib/openai'
 import { database } from '@/lib/database'
 import { supabase } from '@/lib/supabase'
 
+export const dynamic = 'force-dynamic'
+
 export async function POST(request: NextRequest) {
   try {
     // Authorization 헤더에서 토큰 가져오기

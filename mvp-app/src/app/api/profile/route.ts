@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { database } from '@/lib/database'
 import { supabase } from '@/lib/supabase'
 
+export const dynamic = 'force-dynamic'
+
 export async function GET(request: NextRequest) {
   try {
     // Authorization 헤더에서 토큰 가져오기
