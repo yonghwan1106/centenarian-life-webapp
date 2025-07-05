@@ -124,10 +124,66 @@ export default function DailyWellnessChecklist() {
   const [completedItems, setCompletedItems] = useState(0)
   const [totalItems, setTotalItems] = useState(0)
   const [wellnessScore, setWellnessScore] = useState(0)
+  const [currentDate, setCurrentDate] = useState(new Date().toISOString().split('T')[0])
+  const [reflections, setReflections] = useState({
+    achievements: '',
+    improvements: '',
+    tomorrowGoals: ''
+  })
+  const [loading, setLoading] = useState(false)
 
   useEffect(() => {
     calculateStats()
   }, [categories])
+
+  useEffect(() => {
+    if (user) {
+      loadChecklistData()
+    }
+  }, [user, currentDate])
+
+  const loadChecklistData = async () => {
+    try {
+      setLoading(true)
+      // Get token from Supabase client
+      const { data: { session } } = await import('@/lib/supabase').then(m => m.supabase.auth.getSession())
+      if (!session) return
+
+      const response = await fetch(`/api/checklist?date=${currentDate}`, {
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`
+        }
+      })
+      const data = await response.json()
+
+      if (data.entries) {
+        // Update categories with saved data
+        const updatedCategories = checklistData.map(category => ({
+          ...category,
+          items: category.items.map(item => {
+            const savedEntry = data.entries.find((entry: any) => entry.item_id === item.id)
+            return {
+              ...item,
+              completed: savedEntry ? savedEntry.completed : false
+            }
+          })
+        }))
+        setCategories(updatedCategories)
+      }
+
+      if (data.reflection) {
+        setReflections({
+          achievements: data.reflection.achievements || '',
+          improvements: data.reflection.improvements || '',
+          tomorrowGoals: data.reflection.tomorrow_goals || ''
+        })
+      }
+    } catch (error) {
+      console.error('Error loading checklist data:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
 
   const calculateStats = () => {
     let completed = 0
@@ -150,11 +206,86 @@ export default function DailyWellnessChecklist() {
     setWellnessScore(total > 0 ? Math.round((completed / total) * 100) : 0)
   }
 
-  const toggleItem = (categoryIndex: number, itemIndex: number) => {
+  const toggleItem = async (categoryIndex: number, itemIndex: number) => {
     const newCategories = [...categories]
-    newCategories[categoryIndex].items[itemIndex].completed = 
-      !newCategories[categoryIndex].items[itemIndex].completed
+    const item = newCategories[categoryIndex].items[itemIndex]
+    const newCompleted = !item.completed
+    
+    // Update local state immediately
+    newCategories[categoryIndex].items[itemIndex].completed = newCompleted
     setCategories(newCategories)
+
+    // Save to database
+    try {
+      // Get token from Supabase client
+      const { data: { session } } = await import('@/lib/supabase').then(m => m.supabase.auth.getSession())
+      if (!session) return
+
+      const response = await fetch('/api/checklist', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          type: 'checklist',
+          data: {
+            itemId: item.id,
+            completed: newCompleted,
+            date: currentDate
+          }
+        })
+      })
+
+      if (!response.ok) {
+        // Revert on error
+        newCategories[categoryIndex].items[itemIndex].completed = !newCompleted
+        setCategories([...newCategories])
+        console.error('Failed to save checklist item')
+      }
+    } catch (error) {
+      // Revert on error
+      newCategories[categoryIndex].items[itemIndex].completed = !newCompleted
+      setCategories([...newCategories])
+      console.error('Error saving checklist item:', error)
+    }
+  }
+
+  const saveReflection = async () => {
+    try {
+      setLoading(true)
+      // Get token from Supabase client
+      const { data: { session } } = await import('@/lib/supabase').then(m => m.supabase.auth.getSession())
+      if (!session) return
+
+      const response = await fetch('/api/checklist', {
+        method: 'POST',
+        headers: { 
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${session.access_token}`
+        },
+        body: JSON.stringify({
+          type: 'reflection',
+          data: {
+            achievements: reflections.achievements,
+            improvements: reflections.improvements,
+            tomorrowGoals: reflections.tomorrowGoals,
+            date: currentDate
+          }
+        })
+      })
+
+      if (response.ok) {
+        alert('성찰 내용이 저장되었습니다!')
+      } else {
+        alert('저장에 실패했습니다. 다시 시도해 주세요.')
+      }
+    } catch (error) {
+      console.error('Error saving reflection:', error)
+      alert('저장에 실패했습니다. 다시 시도해 주세요.')
+    } finally {
+      setLoading(false)
+    }
   }
 
   const getCategoryProgress = (category: WellnessCategory) => {
@@ -276,6 +407,8 @@ export default function DailyWellnessChecklist() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wellness-blue focus:border-transparent"
               rows={2}
               placeholder="오늘 잘한 일이나 성취한 것을 기록해보세요..."
+              value={reflections.achievements}
+              onChange={(e) => setReflections(prev => ({ ...prev, achievements: e.target.value }))}
             />
           </div>
           
@@ -287,6 +420,8 @@ export default function DailyWellnessChecklist() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wellness-blue focus:border-transparent"
               rows={2}
               placeholder="내일 더 잘하고 싶은 부분을 적어보세요..."
+              value={reflections.improvements}
+              onChange={(e) => setReflections(prev => ({ ...prev, improvements: e.target.value }))}
             />
           </div>
           
@@ -298,11 +433,17 @@ export default function DailyWellnessChecklist() {
               className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-wellness-blue focus:border-transparent"
               rows={2}
               placeholder="내일 중점적으로 할 일들을 계획해보세요..."
+              value={reflections.tomorrowGoals}
+              onChange={(e) => setReflections(prev => ({ ...prev, tomorrowGoals: e.target.value }))}
             />
           </div>
           
-          <button className="w-full bg-wellness-blue text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors">
-            성찰 내용 저장
+          <button 
+            onClick={saveReflection}
+            disabled={loading}
+            className="w-full bg-wellness-blue text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50"
+          >
+            {loading ? '저장 중...' : '성찰 내용 저장'}
           </button>
         </div>
       </div>
