@@ -1,148 +1,19 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { useAuth } from './AuthProvider'
-import { supabase } from '@/lib/supabase'
-import type { HealthRecommendation } from '@/types'
+import { useRecommendations } from '@/hooks'
+import { formatters } from '@/utils'
 
 export default function AIRecommendations() {
-  const { user } = useAuth()
-  const [recommendations, setRecommendations] = useState<HealthRecommendation[]>([])
-  const [loading, setLoading] = useState(false)
-  const [generating, setGenerating] = useState(false)
-  const [error, setError] = useState('')
+  const { 
+    recommendations, 
+    loading, 
+    generating, 
+    error, 
+    generateNewRecommendations, 
+    markAsRead 
+  } = useRecommendations()
 
-  useEffect(() => {
-    if (user) {
-      loadRecommendations()
-    }
-  }, [user])
 
-  const loadRecommendations = async () => {
-    if (!user) return
-
-    setLoading(true)
-    try {
-      // Supabase 세션에서 토큰 가져오기
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.access_token) {
-        setError('인증이 필요합니다.')
-        return
-      }
-
-      const response = await fetch('/api/recommendations', {
-        headers: {
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-      })
-      const data = await response.json()
-      
-      if (response.ok) {
-        setRecommendations(data.recommendations || [])
-      } else {
-        setError(data.error || '추천을 불러오는 중 오류가 발생했습니다.')
-      }
-    } catch (err) {
-      setError('네트워크 오류가 발생했습니다.')
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const generateNewRecommendations = async () => {
-    if (!user) return
-
-    setGenerating(true)
-    setError('')
-    try {
-      // Supabase 세션에서 토큰 가져오기
-      const { data: { session } } = await supabase.auth.getSession()
-      if (!session?.access_token) {
-        setError('인증이 필요합니다.')
-        return
-      }
-
-      const response = await fetch('/api/recommendations', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${session.access_token}`,
-        },
-      })
-      
-      const data = await response.json()
-      
-      if (response.ok) {
-        setRecommendations(prev => [...data.recommendations, ...prev])
-      } else {
-        setError(data.error || '추천 생성 중 오류가 발생했습니다.')
-      }
-    } catch (err) {
-      setError('네트워크 오류가 발생했습니다.')
-    } finally {
-      setGenerating(false)
-    }
-  }
-
-  const markAsRead = async (id: string) => {
-    try {
-      const response = await fetch(`/api/recommendations/${id}`, {
-        method: 'PATCH',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ action: 'mark_read' }),
-      })
-
-      if (response.ok) {
-        setRecommendations(prev => 
-          prev.map(rec => 
-            rec.id === id ? { ...rec, is_read: true } : rec
-          )
-        )
-      }
-    } catch (err) {
-      console.error('Error marking recommendation as read:', err)
-    }
-  }
-
-  const getCategoryIcon = (category: string) => {
-    switch (category) {
-      case 'exercise': return '🏃‍♂️'
-      case 'nutrition': return '🥗'
-      case 'sleep': return '😴'
-      case 'mental_health': return '🧠'
-      default: return '💡'
-    }
-  }
-
-  const getCategoryName = (category: string) => {
-    switch (category) {
-      case 'exercise': return '운동'
-      case 'nutrition': return '영양'
-      case 'sleep': return '수면'
-      case 'mental_health': return '정신건강'
-      default: return '일반'
-    }
-  }
-
-  const getPriorityColor = (priority: string) => {
-    switch (priority) {
-      case 'high': return 'bg-red-100 text-red-800 border-red-200'
-      case 'medium': return 'bg-yellow-100 text-yellow-800 border-yellow-200'
-      case 'low': return 'bg-green-100 text-green-800 border-green-200'
-      default: return 'bg-gray-100 text-gray-800 border-gray-200'
-    }
-  }
-
-  const getPriorityName = (priority: string) => {
-    switch (priority) {
-      case 'high': return '높음'
-      case 'medium': return '보통'
-      case 'low': return '낮음'
-      default: return '보통'
-    }
-  }
 
   if (loading) {
     return (
@@ -191,15 +62,15 @@ export default function AIRecommendations() {
             >
               <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center space-x-3">
-                  <span className="text-2xl">{getCategoryIcon(recommendation.category)}</span>
+                  <span className="text-2xl">{formatters.getCategoryIcon(recommendation.category)}</span>
                   <div>
                     <h3 className="font-semibold text-gray-900">{recommendation.title}</h3>
                     <div className="flex items-center space-x-2 mt-1">
                       <span className="text-sm text-gray-500">
-                        {getCategoryName(recommendation.category)}
+                        {formatters.formatHealthCategory(recommendation.category)}
                       </span>
-                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${getPriorityColor(recommendation.priority)}`}>
-                        {getPriorityName(recommendation.priority)}
+                      <span className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium border ${formatters.getPriorityColor(recommendation.priority)}`}>
+                        {formatters.formatPriorityLevel(recommendation.priority)}
                       </span>
                     </div>
                   </div>
@@ -225,13 +96,7 @@ export default function AIRecommendations() {
               </p>
               
               <div className="mt-3 text-xs text-gray-400">
-                {new Date(recommendation.created_at).toLocaleDateString('ko-KR', {
-                  year: 'numeric',
-                  month: 'short',
-                  day: 'numeric',
-                  hour: '2-digit',
-                  minute: '2-digit'
-                })}
+                {formatters.formatRelativeTime(recommendation.created_at)}
               </div>
             </div>
           ))}
