@@ -160,10 +160,10 @@ export default function DailyWellnessChecklist() {
 
       if (!response.ok) {
         if (response.status === 401) {
-          // Token expired, logout and redirect to login
+          // Token expired, logout and redirect to home
           const { supabase } = await import('@/lib/supabase')
           await supabase.auth.signOut()
-          window.location.href = '/login'
+          window.location.href = '/'
           return
         }
         console.error('Failed to load checklist data:', await response.text())
@@ -291,11 +291,11 @@ export default function DailyWellnessChecklist() {
 
       if (!response.ok) {
         if (response.status === 401) {
-          // Token expired, logout and redirect to login
+          // Token expired, logout and redirect to home
           const { supabase } = await import('@/lib/supabase')
           await supabase.auth.signOut()
           alert('세션이 만료되었습니다. 다시 로그인해주세요.')
-          window.location.href = '/login'
+          window.location.href = '/'
           return
         }
         const errorText = await response.text()

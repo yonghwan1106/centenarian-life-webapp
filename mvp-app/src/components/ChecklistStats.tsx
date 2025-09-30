@@ -61,7 +61,7 @@ export default function ChecklistStats() {
           console.error('Session expired, logging out')
           const { supabase } = await import('@/lib/supabase')
           await supabase.auth.signOut()
-          window.location.href = '/login'
+          window.location.href = '/'
           return
         }
 
