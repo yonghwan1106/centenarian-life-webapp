@@ -55,6 +55,16 @@ export default function ChecklistStats() {
 
         const results = await Promise.all(promises)
 
+        // Check for 401 errors
+        const hasAuthError = results.some((result: any) => result.error === 'Unauthorized')
+        if (hasAuthError) {
+          console.error('Session expired, logging out')
+          const { supabase } = await import('@/lib/supabase')
+          await supabase.auth.signOut()
+          window.location.href = '/login'
+          return
+        }
+
         const statsData: ChecklistStat[] = results.map((result, index) => {
           const entries = result.entries || []
           const completed = entries.length

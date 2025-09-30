@@ -159,6 +159,13 @@ export default function DailyWellnessChecklist() {
       })
 
       if (!response.ok) {
+        if (response.status === 401) {
+          // Token expired, logout and redirect to login
+          const { supabase } = await import('@/lib/supabase')
+          await supabase.auth.signOut()
+          window.location.href = '/login'
+          return
+        }
         console.error('Failed to load checklist data:', await response.text())
         setLoading(false)
         return
@@ -283,6 +290,14 @@ export default function DailyWellnessChecklist() {
       })
 
       if (!response.ok) {
+        if (response.status === 401) {
+          // Token expired, logout and redirect to login
+          const { supabase } = await import('@/lib/supabase')
+          await supabase.auth.signOut()
+          alert('세션이 만료되었습니다. 다시 로그인해주세요.')
+          window.location.href = '/login'
+          return
+        }
         const errorText = await response.text()
         console.error('Failed to save checklist item:', errorText)
         // Revert on error
