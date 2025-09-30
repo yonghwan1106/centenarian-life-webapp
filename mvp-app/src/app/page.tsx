@@ -3,6 +3,7 @@
 import { useAuth } from '@/components/AuthProvider'
 import LandingPage from '@/components/LandingPage'
 import HealthDashboard from '@/components/HealthDashboard'
+import ChecklistStats from '@/components/ChecklistStats'
 import { PageLayout } from '@/components/AppNavigation'
 import Link from 'next/link'
 
@@ -28,6 +29,11 @@ export default function HomePage() {
     >
       {/* 대시보드 컴포넌트 */}
       <HealthDashboard />
+
+      {/* 체크리스트 통계 */}
+      <div className="mt-6">
+        <ChecklistStats />
+      </div>
 
       {/* 오늘의 웰니스 체크리스트 하이라이트 */}
       <div className="mt-8 bg-gradient-to-r from-wellness-green to-wellness-blue rounded-xl p-6 text-white">

@@ -22,16 +22,19 @@ export default function AIPage() {
   }
 
   return (
-    <PageLayout 
-      title="AI 건강 조언" 
+    <PageLayout
+      title="AI 건강 조언"
       description="인공지능이 분석한 맞춤형 건강 추천을 받아보세요"
     >
+      <div className="mb-4 text-right">
+        <span className="text-xs text-gray-400">ChatGPT로 분석합니다.</span>
+      </div>
       <div className="space-y-8">
         {/* AI Insights */}
         <div>
           <AIInsights />
         </div>
-        
+
         {/* AI Recommendations */}
         <div>
           <AIRecommendations />
