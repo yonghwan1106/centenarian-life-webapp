@@ -70,8 +70,12 @@ export default function AIInsights() {
         </div>
       ) : (
         <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm text-center">
-          <p className="text-white/80">
-            위의 버튼을 눌러 AI가 당신의 건강 데이터를 분석하도록 하세요!
+          <p className="text-white/90 mb-3">
+            💡 AI가 당신의 건강 데이터를 분석해드립니다!
+          </p>
+          <p className="text-white/70 text-sm mb-4">
+            먼저 <a href="/health" className="underline font-medium hover:text-white">건강 데이터</a>를 입력하신 후<br/>
+            위의 <strong>'인사이트 생성'</strong> 버튼을 눌러보세요
           </p>
         </div>
       )}

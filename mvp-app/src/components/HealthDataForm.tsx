@@ -39,16 +39,30 @@ export default function HealthDataForm() {
     mood_rating: { min: 1, max: 10 }
   }
 
+  const getDefaultValue = (field: keyof HealthFormData): number => {
+    const defaults: Record<keyof HealthFormData, number> = {
+      heart_rate: 70,
+      blood_pressure_systolic: 120,
+      blood_pressure_diastolic: 80,
+      weight: 70,
+      steps: 8000,
+      sleep_hours: 7.5,
+      mood_rating: 7
+    }
+    return defaults[field] || 0
+  }
+
   const handleIncrement = (field: keyof HealthFormData, step: number = 1) => {
     setFormData(prev => {
-      const currentValue = prev[field] || 0
+      // Use current value if exists, otherwise use default value from placeholder
+      const currentValue = prev[field] !== undefined ? prev[field]! : getDefaultValue(field)
       const limits = fieldLimits[field as keyof typeof fieldLimits]
       let newValue = Math.round((currentValue + step) * 10) / 10
-      
+
       if (limits && newValue > limits.max) {
         newValue = limits.max
       }
-      
+
       return {
         ...prev,
         [field]: newValue
@@ -58,14 +72,15 @@ export default function HealthDataForm() {
 
   const handleDecrement = (field: keyof HealthFormData, step: number = 1) => {
     setFormData(prev => {
-      const currentValue = prev[field] || 0
+      // Use current value if exists, otherwise use default value from placeholder
+      const currentValue = prev[field] !== undefined ? prev[field]! : getDefaultValue(field)
       const limits = fieldLimits[field as keyof typeof fieldLimits]
       let newValue = Math.round((currentValue - step) * 10) / 10
-      
+
       if (limits && newValue < limits.min) {
         newValue = limits.min
       }
-      
+
       return {
         ...prev,
         [field]: newValue
@@ -88,17 +103,24 @@ export default function HealthDataForm() {
         recorded_at: new Date().toISOString()
       }
 
-      const { error: dbError } = await database.createHealthData(healthData)
-      
+      console.log('Submitting health data:', healthData)
+
+      const { data: savedData, error: dbError } = await database.createHealthData(healthData)
+
+      console.log('Health data save result:', { savedData, dbError })
+
       if (dbError) {
-        setError('데이터 저장 중 오류가 발생했습니다.')
+        console.error('Database error:', dbError)
+        setError(`데이터 저장 중 오류가 발생했습니다: ${dbError.message}`)
       } else {
+        console.log('Health data saved successfully:', savedData)
         setSuccess(true)
         setFormData({}) // Reset form
         setTimeout(() => setSuccess(false), 3000)
       }
     } catch (err) {
-      setError('예상치 못한 오류가 발생했습니다.')
+      console.error('Unexpected error:', err)
+      setError(`예상치 못한 오류가 발생했습니다: ${err instanceof Error ? err.message : '알 수 없는 오류'}`)
     } finally {
       setLoading(false)
     }

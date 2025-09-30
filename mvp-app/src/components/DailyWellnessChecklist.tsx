@@ -147,18 +147,28 @@ export default function DailyWellnessChecklist() {
       setLoading(true)
       // Get token from Supabase client
       const { data: { session } } = await import('@/lib/supabase').then(m => m.supabase.auth.getSession())
-      if (!session) return
+      if (!session) {
+        setLoading(false)
+        return
+      }
 
       const response = await fetch(`/api/checklist?date=${currentDate}`, {
         headers: {
           'Authorization': `Bearer ${session.access_token}`
         }
       })
+
+      if (!response.ok) {
+        console.error('Failed to load checklist data:', await response.text())
+        setLoading(false)
+        return
+      }
+
       const data = await response.json()
 
       if (data.entries) {
         // Update categories with saved data
-        const updatedCategories = checklistData.map(category => ({
+        setCategories(prevCategories => prevCategories.map(category => ({
           ...category,
           items: category.items.map(item => {
             const savedEntry = data.entries.find((entry: any) => entry.item_id === item.id)
@@ -167,8 +177,7 @@ export default function DailyWellnessChecklist() {
               completed: savedEntry ? savedEntry.completed : false
             }
           })
-        }))
-        setCategories(updatedCategories)
+        })))
       }
 
       if (data.reflection) {
@@ -207,30 +216,66 @@ export default function DailyWellnessChecklist() {
   }
 
   const toggleItem = async (categoryIndex: number, itemIndex: number) => {
-    const newCategories = [...categories]
-    const item = newCategories[categoryIndex].items[itemIndex]
-    const newCompleted = !item.completed
-    
-    // Update local state immediately
-    newCategories[categoryIndex].items[itemIndex].completed = newCompleted
-    setCategories(newCategories)
+    // Get current state before toggling
+    const currentItem = categories[categoryIndex].items[itemIndex]
+    const newCompleted = !currentItem.completed
+
+    // Update local state immediately using functional update
+    setCategories(prevCategories => {
+      const newCategories = prevCategories.map((category, cIndex) => {
+        if (cIndex === categoryIndex) {
+          return {
+            ...category,
+            items: category.items.map((item, iIndex) => {
+              if (iIndex === itemIndex) {
+                return { ...item, completed: newCompleted }
+              }
+              return item
+            })
+          }
+        }
+        return category
+      })
+      return newCategories
+    })
 
     // Save to database
     try {
       // Get token from Supabase client
       const { data: { session } } = await import('@/lib/supabase').then(m => m.supabase.auth.getSession())
-      if (!session) return
+      if (!session) {
+        console.error('No session found')
+        // Revert on error
+        setCategories(prevCategories => {
+          const newCategories = prevCategories.map((category, cIndex) => {
+            if (cIndex === categoryIndex) {
+              return {
+                ...category,
+                items: category.items.map((item, iIndex) => {
+                  if (iIndex === itemIndex) {
+                    return { ...item, completed: !newCompleted }
+                  }
+                  return item
+                })
+              }
+            }
+            return category
+          })
+          return newCategories
+        })
+        return
+      }
 
       const response = await fetch('/api/checklist', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
         body: JSON.stringify({
           type: 'checklist',
           data: {
-            itemId: item.id,
+            itemId: currentItem.id,
             completed: newCompleted,
             date: currentDate
           }
@@ -238,16 +283,49 @@ export default function DailyWellnessChecklist() {
       })
 
       if (!response.ok) {
+        const errorText = await response.text()
+        console.error('Failed to save checklist item:', errorText)
         // Revert on error
-        newCategories[categoryIndex].items[itemIndex].completed = !newCompleted
-        setCategories([...newCategories])
-        console.error('Failed to save checklist item')
+        setCategories(prevCategories => {
+          const newCategories = prevCategories.map((category, cIndex) => {
+            if (cIndex === categoryIndex) {
+              return {
+                ...category,
+                items: category.items.map((item, iIndex) => {
+                  if (iIndex === itemIndex) {
+                    return { ...item, completed: !newCompleted }
+                  }
+                  return item
+                })
+              }
+            }
+            return category
+          })
+          return newCategories
+        })
+        alert('체크리스트 저장에 실패했습니다.')
       }
     } catch (error) {
-      // Revert on error
-      newCategories[categoryIndex].items[itemIndex].completed = !newCompleted
-      setCategories([...newCategories])
       console.error('Error saving checklist item:', error)
+      // Revert on error
+      setCategories(prevCategories => {
+        const newCategories = prevCategories.map((category, cIndex) => {
+          if (cIndex === categoryIndex) {
+            return {
+              ...category,
+              items: category.items.map((item, iIndex) => {
+                if (iIndex === itemIndex) {
+                  return { ...item, completed: !newCompleted }
+                }
+                return item
+              })
+            }
+          }
+          return category
+        })
+        return newCategories
+      })
+      alert('체크리스트 저장 중 오류가 발생했습니다.')
     }
   }
 
@@ -256,11 +334,22 @@ export default function DailyWellnessChecklist() {
       setLoading(true)
       // Get token from Supabase client
       const { data: { session } } = await import('@/lib/supabase').then(m => m.supabase.auth.getSession())
-      if (!session) return
+      if (!session) {
+        alert('로그인 세션이 만료되었습니다. 다시 로그인해주세요.')
+        setLoading(false)
+        return
+      }
+
+      console.log('Saving reflection:', {
+        achievements: reflections.achievements,
+        improvements: reflections.improvements,
+        tomorrowGoals: reflections.tomorrowGoals,
+        date: currentDate
+      })
 
       const response = await fetch('/api/checklist', {
         method: 'POST',
-        headers: { 
+        headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${session.access_token}`
         },
@@ -276,13 +365,17 @@ export default function DailyWellnessChecklist() {
       })
 
       if (response.ok) {
-        alert('성찰 내용이 저장되었습니다!')
+        const result = await response.json()
+        console.log('Reflection saved successfully:', result)
+        alert('성찰 내용이 저장되었습니다! ✅')
       } else {
-        alert('저장에 실패했습니다. 다시 시도해 주세요.')
+        const errorText = await response.text()
+        console.error('Failed to save reflection:', errorText)
+        alert(`저장에 실패했습니다: ${errorText}`)
       }
     } catch (error) {
       console.error('Error saving reflection:', error)
-      alert('저장에 실패했습니다. 다시 시도해 주세요.')
+      alert(`저장 중 오류가 발생했습니다: ${error instanceof Error ? error.message : '알 수 없는 오류'}`)
     } finally {
       setLoading(false)
     }

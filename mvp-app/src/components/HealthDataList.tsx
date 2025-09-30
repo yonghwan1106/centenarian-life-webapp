@@ -21,7 +21,7 @@ export default function HealthDataList() {
     if (!user) return
 
     try {
-      const { data, error: dbError } = await database.getHealthData(user.id, 10)
+      const { data, error: dbError } = await database.getHealthData(user.id)
       
       if (dbError) {
         setError('데이터를 불러오는 중 오류가 발생했습니다.')

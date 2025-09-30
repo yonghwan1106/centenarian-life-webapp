@@ -4,16 +4,17 @@ import { useRecommendations } from '@/hooks'
 import { formatters } from '@/utils'
 
 export default function AIRecommendations() {
-  const { 
-    recommendations, 
-    loading, 
-    generating, 
-    error, 
-    generateNewRecommendations, 
-    markAsRead 
+  const {
+    recommendations,
+    loading,
+    generating,
+    error,
+    generateNewRecommendations,
+    markAsRead
   } = useRecommendations()
 
-
+  console.log('🎨 AIRecommendations render - recommendations count:', recommendations.length);
+  console.log('⏳ generating:', generating, 'loading:', loading);
 
   if (loading) {
     return (
@@ -46,9 +47,19 @@ export default function AIRecommendations() {
 
       {recommendations.length === 0 ? (
         <div className="text-center py-8">
-          <div className="text-gray-500 mb-4">아직 AI 추천이 없습니다.</div>
-          <div className="text-sm text-gray-400 mb-4">
-            건강 데이터를 입력하신 후 위의 '새 추천 생성' 버튼을 눌러보세요!
+          <div className="text-6xl mb-4">🏥</div>
+          <div className="text-gray-500 mb-2 text-lg font-medium">아직 AI 추천이 없습니다</div>
+          <div className="text-sm text-gray-400 mb-4 max-w-md mx-auto">
+            <a href="/health" className="text-wellness-blue hover:underline font-medium">건강 데이터 페이지</a>에서
+            데이터를 입력하신 후 위의 <strong>'새 추천 생성'</strong> 버튼을 눌러보세요!
+          </div>
+          <div className="mt-4">
+            <a
+              href="/health"
+              className="inline-flex items-center px-4 py-2 bg-wellness-green text-white rounded-lg hover:bg-green-600 transition-colors"
+            >
+              건강 데이터 입력하러 가기 →
+            </a>
           </div>
         </div>
       ) : (

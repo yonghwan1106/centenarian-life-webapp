@@ -38,7 +38,13 @@
       "Bash(git -C .. add vercel.json)",
       "Bash(git -C .. check-ignore vercel.json)",
       "Bash(git -C .. commit -m \"Fix Vercel deployment: Add vercel.json for mvp-app subdirectory\")",
-      "WebFetch(domain:vercel.com)"
+      "WebFetch(domain:vercel.com)",
+      "Bash(where psql)",
+      "Bash(npm install:*)",
+      "Bash(node:*)",
+      "Bash(npx:*)",
+      "Read(//c/Users/user/Downloads/**)",
+      "Bash(git checkout:*)"
     ],
     "deny": []
   }

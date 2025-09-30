@@ -21,7 +21,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 최근 건강 데이터 가져오기
-    const { data: healthData, error: healthError } = await database.getHealthData(user.id, 10)
+    const { data: healthData, error: healthError } = await database.getHealthData(user.id)
     if (healthError) {
       return NextResponse.json({ error: 'Failed to fetch health data' }, { status: 500 })
     }
@@ -40,13 +40,15 @@ export async function POST(request: NextRequest) {
     }
 
     // AI 추천 생성 (타임아웃 추가)
-    console.log('Generating AI recommendations...')
+    console.log('🤖 Generating AI recommendations...')
+    console.log('📊 Health data for AI:', JSON.stringify(healthData, null, 2));
     const recommendations = await Promise.race([
       generateHealthRecommendations(healthData, userProfile),
-      new Promise((_, reject) => 
+      new Promise((_, reject) =>
         setTimeout(() => reject(new Error('Recommendations timeout')), 20000) // 20초 타임아웃
       )
     ]) as any[]
+    console.log('✨ AI recommendations generated:', recommendations.length);
 
     // 추천을 데이터베이스에 저장
     const savedRecommendations = []
@@ -60,13 +62,16 @@ export async function POST(request: NextRequest) {
         confidence: rec.confidence,
         is_read: false
       })
-      
+
       if (!saveError && savedRec) {
         savedRecommendations.push(savedRec)
       }
     }
 
-    return NextResponse.json({ 
+    console.log('💾 Saved recommendations count:', savedRecommendations.length);
+    console.log('📋 Saved recommendations:', JSON.stringify(savedRecommendations, null, 2));
+
+    return NextResponse.json({
       recommendations: savedRecommendations,
       message: `${savedRecommendations.length}개의 새로운 추천이 생성되었습니다.`
     })

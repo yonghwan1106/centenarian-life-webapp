@@ -40,28 +40,40 @@ export const useRecommendations = () => {
     if (!user) return false;
 
     try {
+      console.log('🚀 generateNewRecommendations called');
       setGenerating(true);
       setError(null);
-      
+
       const response = await authUtils.makeAuthenticatedRequest(API_ENDPOINTS.recommendations, {
         method: 'POST',
       });
-      
+
+      console.log('📡 API Response status:', response.status);
       const data = await response.json();
-      
+      console.log('📦 API Response data:', data);
+
       if (response.ok) {
-        setRecommendations(prev => [...data.recommendations, ...prev]);
+        console.log('✅ Response OK, recommendations:', data.recommendations);
+        console.log('📊 Current recommendations count:', recommendations.length);
+        setRecommendations(prev => {
+          const newRecs = [...data.recommendations, ...prev];
+          console.log('🔄 Updated recommendations count:', newRecs.length);
+          return newRecs;
+        });
         return true;
       } else {
         const appError = errorHandler.handleError(data);
+        console.error('❌ API Error:', appError.message);
         setError(appError.message);
         return false;
       }
     } catch (err) {
+      console.error('💥 Exception:', err);
       const appError = errorHandler.handleError(err);
       setError(appError.message);
       return false;
     } finally {
+      console.log('🏁 generateNewRecommendations finished');
       setGenerating(false);
     }
   };

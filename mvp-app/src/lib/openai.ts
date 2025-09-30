@@ -44,27 +44,52 @@ export async function generateHealthRecommendations(
       ]
     }
 
+    // 최근 데이터 분석
+    const recentData = Array.isArray(healthData) ? healthData[0] : healthData
+    const dataContext = []
+
+    if (recentData.heart_rate) dataContext.push(`심박수: ${recentData.heart_rate}bpm`)
+    if (recentData.weight) dataContext.push(`체중: ${recentData.weight}kg`)
+    if (recentData.blood_pressure_systolic) dataContext.push(`혈압: ${recentData.blood_pressure_systolic}/${recentData.blood_pressure_diastolic}mmHg`)
+    if (recentData.steps) dataContext.push(`걸음수: ${recentData.steps}걸음`)
+    if (recentData.sleep_hours) dataContext.push(`수면: ${recentData.sleep_hours}시간`)
+    if (recentData.mood_rating) dataContext.push(`기분: ${recentData.mood_rating}/10`)
+
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo", // 더 빠른 모델 사용
+      model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
-          content: `건강 추천을 JSON 배열로 제공하세요:
-          [{"title":"제목","description":"설명","category":"exercise|nutrition|sleep|mental_health","priority":"low|medium|high","confidence":0.8}]
-          
-          - 2-3개 추천만
-          - 안전한 일반 조언만
-          - 의학적 진단 금지`
+          content: `당신은 전문적인 한국 AI 건강 코치입니다. 사용자의 건강 데이터를 분석하여 구체적이고 실용적인 건강 추천을 제공하세요.
+
+응답 형식 (반드시 유효한 JSON 배열):
+[
+  {
+    "title": "구체적인 행동 제목",
+    "description": "왜 필요한지, 어떻게 실천할지 구체적으로 설명 (50-80자)",
+    "category": "exercise|nutrition|sleep|mental_health",
+    "priority": "low|medium|high",
+    "confidence": 0.7-0.95
+  }
+]
+
+조건:
+- 3-4개의 추천 제공
+- 입력된 수치를 바탕으로 구체적인 개선 제안
+- 실천 가능한 구체적인 행동 지침
+- 한국 문화와 생활 습관 고려
+- 의학적 진단이나 처방 절대 금지`
         },
         {
           role: "user",
-          content: `데이터: ${JSON.stringify(healthData?.slice(0, 3) || [])}
-          
-          JSON 배열로 2-3개 건강 추천해주세요.`
+          content: `사용자의 최근 건강 데이터:
+${dataContext.join('\n')}
+
+이 데이터를 분석하여 구체적이고 개인화된 건강 추천을 JSON 배열로 제공해주세요.`
         }
       ],
-      temperature: 0.5,
-      max_tokens: 800, // 토큰 수 줄임
+      temperature: 0.6,
+      max_tokens: 1000,
     })
 
     const content = completion.choices[0]?.message?.content
@@ -94,24 +119,45 @@ export async function generateHealthInsight(
       return '건강 데이터를 입력하시면 AI가 맞춤형 인사이트를 제공해드릴게요! 🌟'
     }
 
+    // 데이터 요약
+    const dataPoints = []
+    if (healthData.heart_rate) dataPoints.push(`심박수 ${healthData.heart_rate}bpm`)
+    if (healthData.weight) dataPoints.push(`체중 ${healthData.weight}kg`)
+    if (healthData.blood_pressure_systolic && healthData.blood_pressure_diastolic) {
+      dataPoints.push(`혈압 ${healthData.blood_pressure_systolic}/${healthData.blood_pressure_diastolic}mmHg`)
+    }
+    if (healthData.steps) dataPoints.push(`걸음수 ${healthData.steps}걸음`)
+    if (healthData.sleep_hours) dataPoints.push(`수면 ${healthData.sleep_hours}시간`)
+    if (healthData.mood_rating) dataPoints.push(`기분 ${healthData.mood_rating}/10`)
+
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo", // 더 빠른 모델 사용
+      model: "gpt-3.5-turbo",
       messages: [
         {
           role: "system",
-          content: `당신은 친근한 한국 AI 건강 도우미입니다. 간단하고 격려적인 인사이트를 제공하세요.
-          
-          조건: 30-50자, 친근한 톤, 이모지 1개, 의학적 진단 금지`
+          content: `당신은 전문적이면서도 친근한 한국 AI 건강 코치입니다.
+
+          입력된 건강 데이터를 분석하여 구체적이고 개인화된 인사이트를 제공하세요.
+
+          조건:
+          - 입력된 실제 수치를 언급하며 구체적으로 분석
+          - 2-3문장으로 구성 (60-100자)
+          - 건강 상태에 대한 피드백과 격려를 포함
+          - 친근하고 긍정적인 톤
+          - 이모지 1-2개 사용
+          - 의학적 진단이나 처방은 절대 금지
+          - "정상", "비정상" 같은 진단적 표현 금지`
         },
         {
           role: "user",
-          content: `건강 데이터: 심박수=${healthData.heart_rate}, 체중=${healthData.weight}, 수면=${healthData.sleep_hours}시간, 걸음수=${healthData.steps}
-          
-          간단한 격려 메시지를 주세요.`
+          content: `오늘의 건강 데이터:
+${dataPoints.join('\n')}
+
+이 데이터를 바탕으로 구체적이고 개인화된 건강 인사이트를 제공해주세요.`
         }
       ],
       temperature: 0.7,
-      max_tokens: 100, // 토큰 수 줄임
+      max_tokens: 150,
     })
 
     const insight = completion.choices[0]?.message?.content

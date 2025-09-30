@@ -2,7 +2,7 @@ import { supabase } from '@/lib/supabase';
 import { DEFAULTS } from '@/constants';
 
 export const communityService = {
-  async getCommunityPosts(category?: string, limit = DEFAULTS.communityPostsLimit) {
+  async getCommunityPosts(category?: string, limit?: number) {
     console.log('Fetching community posts for category:', category);
     
     let query = supabase
@@ -16,7 +16,7 @@ export const communityService = {
         )
       `)
       .order('created_at', { ascending: false })
-      .limit(limit);
+      .limit(limit ?? DEFAULTS.communityPostsLimit);
     
     if (category && category !== 'all') {
       query = query.eq('category', category);

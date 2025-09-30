@@ -1,6 +1,5 @@
 'use client'
 
-import { useState, useEffect } from 'react'
 import { useAuth } from '@/components/AuthProvider'
 import LoginForm from '@/components/LoginForm'
 import { PageLayout } from '@/components/AppNavigation'
