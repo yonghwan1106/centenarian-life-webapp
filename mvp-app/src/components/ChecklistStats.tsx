@@ -55,13 +55,14 @@ export default function ChecklistStats() {
 
         const results = await Promise.all(promises)
 
-        // Check for 401 errors
-        const hasAuthError = results.some((result: any) => result.error === 'Unauthorized')
-        if (hasAuthError) {
-          console.error('Session expired, logging out')
-          const { supabase } = await import('@/lib/supabase')
-          await supabase.auth.signOut()
-          window.location.href = '/'
+        // Check for 401 errors - but only if all requests failed
+        const allFailed = results.every((result: any) => result.error === 'Unauthorized')
+        if (allFailed) {
+          console.error('All requests failed with auth error - session may be invalid')
+          // Set empty stats instead of logging out immediately
+          // Let the AuthProvider handle session expiration
+          setStats([])
+          setLoading(false)
           return
         }
 

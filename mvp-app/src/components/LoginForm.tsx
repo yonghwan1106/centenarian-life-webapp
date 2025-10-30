@@ -29,7 +29,9 @@ export default function LoginForm() {
         if (result.error.message.includes('Invalid login credentials')) {
           setError('이메일 또는 비밀번호가 올바르지 않습니다.')
         } else if (result.error.message.includes('Email not confirmed')) {
-          setError('이메일 인증이 필요합니다. 이메일을 확인해주세요.')
+          setError('이메일 인증이 필요합니다. 받은편지함에서 인증 이메일을 확인해주세요.')
+        } else if (result.error.message.includes('invalid') && result.error.message.includes('Email')) {
+          setError('유효하지 않은 이메일 주소입니다. Gmail, Outlook 등 실제 이메일 주소를 사용해주세요.')
         } else {
           setError(result.error.message)
         }

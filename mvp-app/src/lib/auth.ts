@@ -17,11 +17,11 @@ export const auth = {
         data: {
           name: name || '',
         },
-        // 개발 환경에서는 이메일 인증 우회 (프로덕션에서는 제거 필요)
-        emailRedirectTo: undefined
+        // 개발 환경에서는 이메일 인증 우회
+        emailRedirectTo: process.env.NODE_ENV === 'development' ? undefined : `${window.location.origin}/auth/callback`
       }
     })
-    
+
     return { user: data.user, session: data.session, error }
   },
 
