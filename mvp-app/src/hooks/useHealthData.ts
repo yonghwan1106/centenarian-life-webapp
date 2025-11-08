@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { healthService } from '@/services';
-import { errorHandler } from '@/utils';
+import { uiErrorHandler } from '@/utils';
 import type { HealthData } from '@/types';
 
 interface HealthStats {
@@ -30,8 +30,8 @@ export const useHealthData = () => {
       const { data, error: fetchError } = await healthService.getHealthStats(user.id, 30);
       
       if (fetchError) {
-        const appError = errorHandler.handleError(fetchError);
-        setError(appError.message);
+        const appError = uiErrorHandler.getMessage(fetchError);
+        setError(appError);
         return;
       }
 
@@ -43,8 +43,8 @@ export const useHealthData = () => {
         setStats(null);
       }
     } catch (err) {
-      const appError = errorHandler.handleError(err);
-      setError(appError.message);
+      const appError = uiErrorHandler.getMessage(err);
+      setError(appError);
     } finally {
       setLoading(false);
     }
@@ -84,8 +84,8 @@ export const useHealthData = () => {
       const { data: newData, error: addError } = await healthService.createHealthData(data);
       
       if (addError) {
-        const appError = errorHandler.handleError(addError);
-        setError(appError.message);
+        const appError = uiErrorHandler.getMessage(addError);
+        setError(appError);
         return false;
       }
 
@@ -93,8 +93,8 @@ export const useHealthData = () => {
       await fetchHealthData();
       return true;
     } catch (err) {
-      const appError = errorHandler.handleError(err);
-      setError(appError.message);
+      const appError = uiErrorHandler.getMessage(err);
+      setError(appError);
       return false;
     }
   };
@@ -106,8 +106,8 @@ export const useHealthData = () => {
       const { data: updatedData, error: updateError } = await healthService.updateHealthData(id, updates);
       
       if (updateError) {
-        const appError = errorHandler.handleError(updateError);
-        setError(appError.message);
+        const appError = uiErrorHandler.getMessage(updateError);
+        setError(appError);
         return false;
       }
 
@@ -115,8 +115,8 @@ export const useHealthData = () => {
       await fetchHealthData();
       return true;
     } catch (err) {
-      const appError = errorHandler.handleError(err);
-      setError(appError.message);
+      const appError = uiErrorHandler.getMessage(err);
+      setError(appError);
       return false;
     }
   };
@@ -128,8 +128,8 @@ export const useHealthData = () => {
       const { error: deleteError } = await healthService.deleteHealthData(id);
       
       if (deleteError) {
-        const appError = errorHandler.handleError(deleteError);
-        setError(appError.message);
+        const appError = uiErrorHandler.getMessage(deleteError);
+        setError(appError);
         return false;
       }
 
@@ -137,8 +137,8 @@ export const useHealthData = () => {
       await fetchHealthData();
       return true;
     } catch (err) {
-      const appError = errorHandler.handleError(err);
-      setError(appError.message);
+      const appError = uiErrorHandler.getMessage(err);
+      setError(appError);
       return false;
     }
   };

@@ -36,8 +36,8 @@ export default function ChecklistStats() {
         }
 
         // 최근 7일간의 체크리스트 통계 가져오기
-        const promises = []
-        const dates = []
+        const promises: Promise<any>[] = []
+        const dates: string[] = []
 
         for (let i = 6; i >= 0; i--) {
           const date = new Date()

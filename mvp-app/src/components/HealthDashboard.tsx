@@ -1,11 +1,31 @@
 'use client'
 
+import { useMemo } from 'react'
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, BarChart, Bar } from 'recharts'
 import { useHealthData } from '@/hooks'
 import { formatters } from '@/utils'
 
 export default function HealthDashboard() {
   const { healthData, stats, loading, error } = useHealthData()
+
+  // 차트 데이터 최적화: 최대 30개 데이터 포인트로 제한
+  const optimizedChartData = useMemo(() => {
+    if (!stats?.weeklyData || stats.weeklyData.length === 0) {
+      return []
+    }
+
+    const maxDataPoints = 30
+    const data = stats.weeklyData
+
+    // 데이터가 30개 이하면 그대로 반환
+    if (data.length <= maxDataPoints) {
+      return data
+    }
+
+    // 균등 샘플링으로 30개로 축소
+    const interval = Math.floor(data.length / maxDataPoints)
+    return data.filter((_, index) => index % interval === 0).slice(0, maxDataPoints)
+  }, [stats?.weeklyData])
 
   if (loading) {
     return (
@@ -75,13 +95,13 @@ export default function HealthDashboard() {
       </div>
 
       {/* 차트 섹션 */}
-      {stats.weeklyData.length > 0 && (
+      {optimizedChartData.length > 0 && (
         <div className="grid md:grid-cols-2 gap-6">
           {/* 체중 & 심박수 차트 */}
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">체중 & 심박수 추세</h3>
             <ResponsiveContainer width="100%" height={250}>
-              <LineChart data={stats.weeklyData}>
+              <LineChart data={optimizedChartData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis yAxisId="left" />
@@ -119,7 +139,7 @@ export default function HealthDashboard() {
           <div className="bg-white rounded-lg shadow-lg p-6">
             <h3 className="text-lg font-semibold text-gray-800 mb-4">수면 시간</h3>
             <ResponsiveContainer width="100%" height={250}>
-              <BarChart data={stats.weeklyData}>
+              <BarChart data={optimizedChartData}>
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="date" />
                 <YAxis />
@@ -138,11 +158,11 @@ export default function HealthDashboard() {
       )}
 
       {/* 걸음수 차트 */}
-      {stats.weeklyData.some(d => d.steps > 0) && (
+      {optimizedChartData.some(d => d.steps > 0) && (
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h3 className="text-lg font-semibold text-gray-800 mb-4">일일 걸음수</h3>
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={stats.weeklyData}>
+            <BarChart data={optimizedChartData}>
               <CartesianGrid strokeDasharray="3 3" />
               <XAxis dataKey="date" />
               <YAxis />

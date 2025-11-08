@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { recommendationsService } from '@/services';
-import { authUtils, errorHandler } from '@/utils';
+import { authUtils, uiErrorHandler } from '@/utils';
 import { API_ENDPOINTS } from '@/constants';
 import type { HealthRecommendation } from '@/types';
 
@@ -25,12 +25,12 @@ export const useRecommendations = () => {
       if (response.ok) {
         setRecommendations(data.recommendations || []);
       } else {
-        const appError = errorHandler.handleError(data);
-        setError(appError.message);
+        const appError = uiErrorHandler.getMessage(data);
+        setError(appError);
       }
     } catch (err) {
-      const appError = errorHandler.handleError(err);
-      setError(appError.message);
+      const appError = uiErrorHandler.getMessage(err);
+      setError(appError);
     } finally {
       setLoading(false);
     }
@@ -62,15 +62,15 @@ export const useRecommendations = () => {
         });
         return true;
       } else {
-        const appError = errorHandler.handleError(data);
-        console.error('❌ API Error:', appError.message);
-        setError(appError.message);
+        const appError = uiErrorHandler.getMessage(data);
+        console.error("❌ API Error:", appError);
+        setError(appError);
         return false;
       }
     } catch (err) {
       console.error('💥 Exception:', err);
-      const appError = errorHandler.handleError(err);
-      setError(appError.message);
+      const appError = uiErrorHandler.getMessage(err);
+      setError(appError);
       return false;
     } finally {
       console.log('🏁 generateNewRecommendations finished');
@@ -99,13 +99,13 @@ export const useRecommendations = () => {
         return true;
       } else {
         const data = await response.json();
-        const appError = errorHandler.handleError(data);
-        setError(appError.message);
+        const appError = uiErrorHandler.getMessage(data);
+        setError(appError);
         return false;
       }
     } catch (err) {
-      const appError = errorHandler.handleError(err);
-      setError(appError.message);
+      const appError = uiErrorHandler.getMessage(err);
+      setError(appError);
       return false;
     }
   };
@@ -119,8 +119,8 @@ export const useRecommendations = () => {
       const { data: updatedData, error: updateError } = await recommendationsService.markAllRecommendationsAsRead(user.id);
       
       if (updateError) {
-        const appError = errorHandler.handleError(updateError);
-        setError(appError.message);
+        const appError = uiErrorHandler.getMessage(updateError);
+        setError(appError);
         return false;
       }
 
@@ -129,8 +129,8 @@ export const useRecommendations = () => {
       );
       return true;
     } catch (err) {
-      const appError = errorHandler.handleError(err);
-      setError(appError.message);
+      const appError = uiErrorHandler.getMessage(err);
+      setError(appError);
       return false;
     }
   };
@@ -142,16 +142,16 @@ export const useRecommendations = () => {
       const { error: deleteError } = await recommendationsService.deleteRecommendation(id);
       
       if (deleteError) {
-        const appError = errorHandler.handleError(deleteError);
-        setError(appError.message);
+        const appError = uiErrorHandler.getMessage(deleteError);
+        setError(appError);
         return false;
       }
 
       setRecommendations(prev => prev.filter(rec => rec.id !== id));
       return true;
     } catch (err) {
-      const appError = errorHandler.handleError(err);
-      setError(appError.message);
+      const appError = uiErrorHandler.getMessage(err);
+      setError(appError);
       return false;
     }
   };
@@ -165,15 +165,15 @@ export const useRecommendations = () => {
       const { data, error: fetchError } = await recommendationsService.getRecommendationsByCategory(user.id, category);
       
       if (fetchError) {
-        const appError = errorHandler.handleError(fetchError);
-        setError(appError.message);
+        const appError = uiErrorHandler.getMessage(fetchError);
+        setError(appError);
         return [];
       }
 
       return data || [];
     } catch (err) {
-      const appError = errorHandler.handleError(err);
-      setError(appError.message);
+      const appError = uiErrorHandler.getMessage(err);
+      setError(appError);
       return [];
     }
   };
@@ -187,15 +187,15 @@ export const useRecommendations = () => {
       const { data, error: fetchError } = await recommendationsService.getUnreadRecommendations(user.id);
       
       if (fetchError) {
-        const appError = errorHandler.handleError(fetchError);
-        setError(appError.message);
+        const appError = uiErrorHandler.getMessage(fetchError);
+        setError(appError);
         return [];
       }
 
       return data || [];
     } catch (err) {
-      const appError = errorHandler.handleError(err);
-      setError(appError.message);
+      const appError = uiErrorHandler.getMessage(err);
+      setError(appError);
       return [];
     }
   };

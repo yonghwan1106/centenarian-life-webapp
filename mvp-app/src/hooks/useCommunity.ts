@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/components/AuthProvider';
 import { communityService } from '@/services';
-import { errorHandler } from '@/utils';
+import { uiErrorHandler } from '@/utils';
 import { DEFAULTS } from '@/constants';
 
 export const useCommunity = () => {
@@ -18,15 +18,15 @@ export const useCommunity = () => {
       const { data, error: fetchError } = await communityService.getCommunityPosts(category, DEFAULTS.communityPostsLimit);
       
       if (fetchError) {
-        const appError = errorHandler.handleError(fetchError);
-        setError(appError.message);
+        const appError = uiErrorHandler.getMessage(fetchError);
+        setError(appError);
         return;
       }
 
       setPosts(data || []);
     } catch (err) {
-      const appError = errorHandler.handleError(err);
-      setError(appError.message);
+      const appError = uiErrorHandler.getMessage(err);
+      setError(appError);
     } finally {
       setLoading(false);
     }
@@ -48,8 +48,8 @@ export const useCommunity = () => {
       });
       
       if (createError) {
-        const appError = errorHandler.handleError(createError);
-        setError(appError.message);
+        const appError = uiErrorHandler.getMessage(createError);
+        setError(appError);
         return false;
       }
 
@@ -57,8 +57,8 @@ export const useCommunity = () => {
       setPosts(prev => [data, ...prev]);
       return true;
     } catch (err) {
-      const appError = errorHandler.handleError(err);
-      setError(appError.message);
+      const appError = uiErrorHandler.getMessage(err);
+      setError(appError);
       return false;
     }
   };
@@ -74,8 +74,8 @@ export const useCommunity = () => {
       const { data, error: updateError } = await communityService.updateCommunityPost(postId, updates);
       
       if (updateError) {
-        const appError = errorHandler.handleError(updateError);
-        setError(appError.message);
+        const appError = uiErrorHandler.getMessage(updateError);
+        setError(appError);
         return false;
       }
 
@@ -87,8 +87,8 @@ export const useCommunity = () => {
       );
       return true;
     } catch (err) {
-      const appError = errorHandler.handleError(err);
-      setError(appError.message);
+      const appError = uiErrorHandler.getMessage(err);
+      setError(appError);
       return false;
     }
   };
@@ -100,8 +100,8 @@ export const useCommunity = () => {
       const { error: deleteError } = await communityService.deleteCommunityPost(postId);
       
       if (deleteError) {
-        const appError = errorHandler.handleError(deleteError);
-        setError(appError.message);
+        const appError = uiErrorHandler.getMessage(deleteError);
+        setError(appError);
         return false;
       }
 
@@ -109,8 +109,8 @@ export const useCommunity = () => {
       setPosts(prev => prev.filter(post => post.id !== postId));
       return true;
     } catch (err) {
-      const appError = errorHandler.handleError(err);
-      setError(appError.message);
+      const appError = uiErrorHandler.getMessage(err);
+      setError(appError);
       return false;
     }
   };
@@ -124,8 +124,8 @@ export const useCommunity = () => {
       const { liked, error: likeError } = await communityService.toggleLike(postId, user.id);
       
       if (likeError) {
-        const appError = errorHandler.handleError(likeError);
-        setError(appError.message);
+        const appError = uiErrorHandler.getMessage(likeError);
+        setError(appError);
         return false;
       }
 
@@ -144,8 +144,8 @@ export const useCommunity = () => {
       );
       return liked;
     } catch (err) {
-      const appError = errorHandler.handleError(err);
-      setError(appError.message);
+      const appError = uiErrorHandler.getMessage(err);
+      setError(appError);
       return false;
     }
   };
@@ -157,15 +157,15 @@ export const useCommunity = () => {
       const { data, error: fetchError } = await communityService.getUserPosts(userId, limit);
       
       if (fetchError) {
-        const appError = errorHandler.handleError(fetchError);
-        setError(appError.message);
+        const appError = uiErrorHandler.getMessage(fetchError);
+        setError(appError);
         return [];
       }
 
       return data || [];
     } catch (err) {
-      const appError = errorHandler.handleError(err);
-      setError(appError.message);
+      const appError = uiErrorHandler.getMessage(err);
+      setError(appError);
       return [];
     }
   };
@@ -202,15 +202,15 @@ export const usePostComments = (postId: string) => {
       const { data, error: fetchError } = await communityService.getPostComments(postId);
       
       if (fetchError) {
-        const appError = errorHandler.handleError(fetchError);
-        setError(appError.message);
+        const appError = uiErrorHandler.getMessage(fetchError);
+        setError(appError);
         return;
       }
 
       setComments(data || []);
     } catch (err) {
-      const appError = errorHandler.handleError(err);
-      setError(appError.message);
+      const appError = uiErrorHandler.getMessage(err);
+      setError(appError);
     } finally {
       setLoading(false);
     }
@@ -229,8 +229,8 @@ export const usePostComments = (postId: string) => {
       });
       
       if (createError) {
-        const appError = errorHandler.handleError(createError);
-        setError(appError.message);
+        const appError = uiErrorHandler.getMessage(createError);
+        setError(appError);
         return false;
       }
 
@@ -238,8 +238,8 @@ export const usePostComments = (postId: string) => {
       setComments(prev => [...prev, data]);
       return true;
     } catch (err) {
-      const appError = errorHandler.handleError(err);
-      setError(appError.message);
+      const appError = uiErrorHandler.getMessage(err);
+      setError(appError);
       return false;
     }
   };
@@ -251,8 +251,8 @@ export const usePostComments = (postId: string) => {
       const { data, error: updateError } = await communityService.updateComment(commentId, content);
       
       if (updateError) {
-        const appError = errorHandler.handleError(updateError);
-        setError(appError.message);
+        const appError = uiErrorHandler.getMessage(updateError);
+        setError(appError);
         return false;
       }
 
@@ -264,8 +264,8 @@ export const usePostComments = (postId: string) => {
       );
       return true;
     } catch (err) {
-      const appError = errorHandler.handleError(err);
-      setError(appError.message);
+      const appError = uiErrorHandler.getMessage(err);
+      setError(appError);
       return false;
     }
   };
@@ -277,8 +277,8 @@ export const usePostComments = (postId: string) => {
       const { error: deleteError } = await communityService.deleteComment(commentId);
       
       if (deleteError) {
-        const appError = errorHandler.handleError(deleteError);
-        setError(appError.message);
+        const appError = uiErrorHandler.getMessage(deleteError);
+        setError(appError);
         return false;
       }
 
@@ -286,8 +286,8 @@ export const usePostComments = (postId: string) => {
       setComments(prev => prev.filter(comment => comment.id !== commentId));
       return true;
     } catch (err) {
-      const appError = errorHandler.handleError(err);
-      setError(appError.message);
+      const appError = uiErrorHandler.getMessage(err);
+      setError(appError);
       return false;
     }
   };

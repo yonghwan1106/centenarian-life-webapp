@@ -469,24 +469,27 @@ export default function DailyWellnessChecklist() {
                 <div key={item.id} className="flex items-start space-x-3">
                   <button
                     onClick={() => toggleItem(categoryIndex, itemIndex)}
-                    className={`flex-shrink-0 w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${
-                      item.completed 
-                        ? 'bg-wellness-green border-wellness-green text-white' 
-                        : 'border-gray-300 hover:border-wellness-green'
+                    role="checkbox"
+                    aria-checked={item.completed}
+                    aria-label={`${item.title} - ${item.description}. ${item.points}포인트. ${item.completed ? '완료됨' : '미완료'}`}
+                    className={`flex-shrink-0 w-11 h-11 rounded-full border-2 flex items-center justify-center transition-all focus:outline-none focus:ring-2 focus:ring-wellness-green focus:ring-offset-2 ${
+                      item.completed
+                        ? 'bg-wellness-green border-wellness-green text-white'
+                        : 'border-gray-300 hover:border-wellness-green hover:bg-gray-50'
                     }`}
                   >
-                    {item.completed && <span className="text-xs">✓</span>}
+                    {item.completed && <span className="text-base" aria-hidden="true">✓</span>}
                   </button>
-                  
+
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center space-x-2">
-                      <span className="text-lg">{item.icon}</span>
+                      <span className="text-lg" aria-hidden="true">{item.icon}</span>
                       <h4 className={`font-medium ${
                         item.completed ? 'text-gray-500 line-through' : 'text-gray-800'
                       }`}>
                         {item.title}
                       </h4>
-                      <span className="text-xs bg-wellness-blue text-white px-2 py-1 rounded-full">
+                      <span className="text-xs bg-wellness-blue text-white px-2 py-1 rounded-full" aria-label={`${item.points} 포인트`}>
                         +{item.points}pt
                       </span>
                     </div>
